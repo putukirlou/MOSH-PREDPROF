@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Главная Страница</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Настройка высоты главной секции */
+    .hero {
+      height: 100vh;
+      background: url('https://source.unsplash.com/1600x900/?nature,water') no-repeat center center;
+      background-size: cover;
+      position: relative;
+      color: white;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Мой Сайт</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">О нас</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Услуги</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Контакты</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <section class="hero d-flex align-items-center">
+    <div class="hero-overlay"></div>
+    <div class="container text-center hero-content">
+      <h1 class="display-4">Добро пожаловать на наш сайт!</h1>
+      <p class="lead">Мы предлагаем лучшие решения для вашего бизнеса.</p>
+      <a href="#" class="btn btn-primary btn-lg me-2">Узнать больше</a>
+      <a href="#" class="btn btn-outline-light btn-lg">Связаться с нами</a>
+    </div>
+  </section>
+
+
+  <section class="py-5">
+    <div class="container">
+      <h2 class="mb-4">Наши Услуги</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <h4>Услуга 1</h4>
+          <p>Краткое описание услуги 1.</p>
+          <a href="#" class="btn btn-secondary">Подробнее</a>
+        </div>
+        <div class="col-md-4">
+          <h4>Услуга 2</h4>
+          <p>Краткое описание услуги 2.</p>
+          <a href="#" class="btn btn-secondary">Подробнее</a>
+        </div>
+        <div class="col-md-4">
+          <h4>Услуга 3</h4>
+          <p>Краткое описание услуги 3.</p>
+          <a href="#" class="btn btn-secondary">Подробнее</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer class="bg-dark text-white text-center py-3">
+    &copy; 2024 Мой Сайт. Все права защищены.
+  </footer>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
