@@ -8,6 +8,7 @@ from view_addatm import *
 from view_listatm import *
 from view_command import *
 from view_mechanics import *
+from view_cars import *
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -66,6 +67,13 @@ def command_route(cursor, connection):
 def mechanics_route(cursor, connection):
     return mechanics(cursor, connection)
 
+
+@app.route("/cars", endpoint="cars", methods=["GET", "POST"])
+@connect_db
+def cars_route(cursor, connection):
+    return cars(cursor, connection)
+
+
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
 def deleteatm(cursor, connection):
@@ -99,8 +107,8 @@ def editatm(cursor, connection):
         args["id"] = id
         return render_template("editatm.html", args=args)
     elif request.method == "POST":
-        ll=request.form.get("ll", "")
-        id=request.form.get("id", "")
+        ll = request.form.get("ll", "")
+        id = request.form.get("id", "")
         if not ll:
             args["error"] = "Не ввели Device ID"
             return render_template("error.html", args=args)
@@ -111,7 +119,6 @@ def editatm(cursor, connection):
         connection.commit()
 
         return redirect(f"/listatm", 301)
-
 
 
 if __name__ == '__main__':
