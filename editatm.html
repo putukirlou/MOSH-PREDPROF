@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block content %}
+
+    <h1 class="text-body-emphasis">Редактировать координаты банкомата</h1>
+    <p class="fs-5 col-md-8">Введите данные о добавляемом банкомате</p>
+
+<form action="/editatm" method="post" enctype="multipart/form-data">
+
+<div class="mb-3">
+  <label for="ll" class="form-label">Координаты</label>
+  <input type="text" class="form-control" id="ll" name="ll" placeholder="37.622504%2C55.753215">
+</div>
+
+  <div class="mb-3">
+    <button type="submit" class="btn btn-primary mb-3">Добавить</button>
+  </div>
+
+    <input type="hidden" id="id" name="id" value="{{args['id']}}" />
+
+</form>
+
+
+{% endblock %}
