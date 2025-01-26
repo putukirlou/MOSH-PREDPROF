@@ -161,34 +161,6 @@ def deletemechanics(cursor, connection):
 
     return redirect(f"/listmechanics", 302)
 
-@app.route("/editmechanics", endpoint="editmechanics", methods=["GET", "POST"])
-@connect_db
-def editmechanics(cursor, connection):
-    args = dict()
-    args["title"] = "Редактировать список механиков"
-    if request.method == "GET":
-        id = request.args.get("id")
-        if not id:
-            args["error"] = "Номер механика пустой"
-            return render_template("error.html", args=args)
-
-        args["id"] = id
-        return render_template("editmechanics.html", args=args)
-    elif request.method == "POST":
-        name = request.form.get("name", "")
-        id = request.form.get("id", "")
-        if not name:
-            args["error"] = "Не ввели Имя"
-            return render_template("error.html", args=args)
-        query = (
-            f"UPDATE mechanics SET name = '{name}' WHERE id={id};"
-        )
-        cursor.execute(query)
-        connection.commit()
-
-        return redirect(f"/listmechanics", 302)
-
-
 
 @app.route("/deletecars", endpoint="deletemecars", methods=["GET", "POST"])
 @connect_db
