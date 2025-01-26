@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block content %}
+
+    <h1 class="text-body-emphasis">Список банкоматов</h1>
+    <ul>
+        {% for item in args['atms'] %}
+        <li>{{item["device_id"]}} коорд.: {{item["ll"]}} <a href='/deleteatm?id={{ item["id"] }}'>Удалить</a> <a href='/editatm?id={{ item["id"] }}'>Ред. коордитаны</a></li>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}
