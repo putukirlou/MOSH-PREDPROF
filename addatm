@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block content %}
+
+    <h1 class="text-body-emphasis">Добавить банкомат</h1>
+    <p class="fs-5 col-md-8">Введите данные о добавляемом банкомате</p>
+
+<form action="/addatm" method="post" enctype="multipart/form-data">
+
+<div class="mb-3">
+  <label for="deviceid" class="form-label">Device ID</label>
+  <input type="text" class="form-control" id="deviceid" name="deviceid" placeholder="Банкомат101">
+</div>
+
+<div class="mb-3">
+  <label for="ll" class="form-label">Координаты</label>
+  <input type="text" class="form-control" id="ll" name="ll" placeholder="37.622504%2C55.753215">
+</div>
+
+  <div class="mb-3">
+    <button type="submit" class="btn btn-primary mb-3">Добавить</button>
+  </div>
+
+</form>
+
+
+{% endblock %}
