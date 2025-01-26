@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block content %}
+
+    <h1 class="text-body-emphasis">Список машин инкассации</h1>
+    <ul>
+        {% for item in args['cars'] %}
+        <li>№{{item["id"]}} имя:{{item["name"]}} <a href='/deletecars?id={{ item["id"] }}'>Удалить</a></li>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}
