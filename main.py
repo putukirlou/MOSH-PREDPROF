@@ -10,9 +10,8 @@ from view_addcars import *
 from view_listatm import *
 from view_listmechanics import *
 from view_listcars import *
+from view_listmessages import *
 from view_command import *
-
-
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -78,6 +77,12 @@ def listmechanics_route(cursor, connection):
 def listcars_route(cursor, connection):
     return listcars(cursor, connection)
 
+@app.route("/listmessages", endpoint="listmessages", methods=["GET", "POST"])
+@connect_db
+def listmessages_route(cursor, connection):
+    return listmessages(cursor, connection)
+
+
 
 @app.route("/command", endpoint="command", methods=["GET", "POST"])
 @connect_db
@@ -85,17 +90,10 @@ def command_route(cursor, connection):
     return command(cursor, connection)
 
 
-@app.route("/cars", endpoint="cars", methods=["GET", "POST"])
-@connect_db
-def cars_route(cursor, connection):
-    return cars(cursor, connection)
-
-
 @app.route("/map", endpoint="map", methods=["GET", "POST"])
 @connect_db
 def map_route(cursor, connection):
     return map(cursor, connection)
-
 
 
 
@@ -160,6 +158,7 @@ def deletemechanics(cursor, connection):
     connection.commit()
 
     return redirect(f"/listmechanics", 302)
+
 
 
 @app.route("/deletecars", endpoint="deletemecars", methods=["GET", "POST"])
