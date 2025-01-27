@@ -1,21 +1,18 @@
-from flask import render_template, request,redirect
 
+from flask import Flask, render_template, request, current_app, redirect
 
-def mechanics(cursor, connection):
+def listmechanics(cursor, connection):
     args = dict()
-    args["title"] = "Добавить/удалить механика"
-    if request.method == "GET":
-        return render_template("mechanics.html", args=args)
-    elif request.method == "POST":
-        id = request.form.get("id", "")
-        name = request.form.get("name", "")
-        if not id:
-            args["error"] = "Не ввели ID"
-            return render_template("error.html", args=args)
-        query = (
-            f"INSERT INTO mechanics (id, name, status) VALUES ('{id}', '{name}', 1);"
-        )
-        cursor.execute(query)
-        connection.commit()
+    args["title"] = "Список механиков"
 
-        return redirect(f"/mechanics", 302)
+    query = (
+        f"SELECT * FROM mechanics;"
+    )
+    cursor.execute(query)
+    mechanics = cursor.fetchall()
+    args["mechanics"] = mechanics
+
+    if request.method == "GET":
+        return render_template("listmechanics.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmechanics.html", args=args)
