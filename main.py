@@ -117,8 +117,8 @@ def mechanics_route(cursor, connection, args):
 @app.route("/addcars", endpoint="addcars", methods=["GET", "POST"])
 @connect_db
 @authorization
-def cars_route(cursor, connection, args):
-    return cars(cursor, connection, args)
+def addcars_route(cursor, connection, args):
+    return addcars(cursor, connection, args)
 
 
 @app.route("/listatm", endpoint="listatm", methods=["GET", "POST"])

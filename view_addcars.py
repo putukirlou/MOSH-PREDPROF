@@ -1,7 +1,7 @@
 from flask import render_template, request,redirect
 
 
-def cars(cursor, connection):
+def addcars(cursor, connection):
     args = dict()
     args["title"] = "Добавить/удалить машину инкассации"
     if request.method == "GET":
