@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block content %}
     <h1 class="text-body-emphasis">Список механиков</h1>
 <section>
-  <table class="table table-bordered">
+  <table id="table">
     <thead>
     <tr>
       <th scope="col">id</th>
@@ -11,6 +11,7 @@
       <th scope="col">Value</th>
     </tr>
     </thead>
+
     <tbody>
     <tr>
       <td>
@@ -50,7 +51,9 @@
         </ul>
       </td>
     </tr>
-    </tbody>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="table-sort.js"></script>
+    <tbody>
   </table>
 </section>
 
