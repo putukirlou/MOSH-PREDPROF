@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block content %}
+    <h1 class="text-body-emphasis">Список механиков</h1>
+<section>
+  <table class="table table-bordered">
+    <thead>
+    <tr>
+      <th scope="col">id</th>
+      <th scope="col">DeviceID</th>
+      <th scope="col">EventType</th>
+      <th scope="col">Timestamp</th>
+      <th scope="col">Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>
+        <ul>
+            {% for item in args['messages'] %}
+            <li>{{item["id"]}}</li>
+            {% endfor %}
+        </ul>
+      </td>
+      <td>
+        <ul>
+            {% for item in args['messages'] %}
+            <li>{{item["DeviceID"]}}</li>
+            {% endfor %}
+        </ul>
+      </td>
+      <td>
+        <ul>
+            {% for item in args['messages'] %}
+            <li>{{item["EventType"]}}</li>
+            {% endfor %}
+        </ul>
+      </td>
+      <td>
+        <ul>
+            {% for item in args['messages'] %}
+            <li>{{item["Timestamp"]}}</li>
+            {% endfor %}
+        </ul>
+      </td>
+
+      <td>
+        <ul>
+            {% for item in args['messages'] %}
+            <li>{{item["Value"]}}</li>
+            {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+
+
+
+{% endblock %}
