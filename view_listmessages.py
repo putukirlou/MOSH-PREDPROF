@@ -1,9 +1,11 @@
-
-from flask import render_template, request
+import os
+import sqlite3
+from functools import wraps
+from flask import Flask, render_template, request, current_app, redirect
 
 def listmessages(cursor, connection, args):
 
-    args["title"] = "Состоянение парка банкоматов"
+    args["title"] = "Список парка банкоматов"
 
     query = (
         f"SELECT * FROM messages;"
@@ -13,6 +15,6 @@ def listmessages(cursor, connection, args):
     args["messages"] = messages
 
     if request.method == "GET":
-        return render_template("listmessages.html", args=args)
+        return render_template("messages.html", args=args)
     elif request.method == "POST":
-        return render_template("listmessages.html", args=args)
+        return render_template("messages.html", args=args)

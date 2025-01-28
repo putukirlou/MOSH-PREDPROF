@@ -130,6 +130,13 @@
 
       <span class="fs-4">Учет банкоматов</span>
     </a>
+    
+    {% if args['access'] == 0 %}
+    <a href="/">Войти</a>
+    {% endif %}
+    {% if args['access'] != 0 %}
+    <a href="/exit">Выйти</a>
+    {% endif %}
   </header>
 
   <main>

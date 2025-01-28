@@ -1,7 +1,6 @@
 from flask import render_template, request
 
-def command(cursor, connection):
-    args = dict()
+def command(cursor, connection,args):
     args["title"] = "Комманда"
 
     cursor.execute(f"SELECT * FROM atm;")

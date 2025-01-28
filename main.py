@@ -1,7 +1,8 @@
 import os
 import sqlite3
 from functools import wraps
-from flask import Flask, current_app, request, redirect, session
+import datetime
+from flask import Flask, render_template, request, current_app, redirect, session
 
 
 from view_addatm import *
@@ -38,7 +39,6 @@ def connect_db(func):
             print("Не удалось подключиться к SQLite БД.")
             print(ex)
         return result
-
     return wrapper
 
 
@@ -110,8 +110,8 @@ def addatm_route(cursor, connection, args):
 @app.route("/addmechanics", endpoint="addmechanics", methods=["GET", "POST"])
 @connect_db
 @authorization
-def mechanics_route(cursor, connection, args):
-    return mechanics(cursor, connection, args)
+def addmechanics_route(cursor, connection, args):
+    return addmechanics(cursor, connection, args)
 
 
 @app.route("/addcars", endpoint="addcars", methods=["GET", "POST"])
@@ -257,7 +257,6 @@ def exit_from_profile():
     session.pop("name", None)
     session.pop("password", None)
     return redirect("/", 301)
-
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')

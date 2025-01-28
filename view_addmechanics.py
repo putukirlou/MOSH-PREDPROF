@@ -1,8 +1,10 @@
-from flask import render_template, request, redirect
+import os
+import sqlite3
+from functools import wraps
+from flask import Flask, render_template, request, current_app, redirect
 
+def addmechanics(cursor, connection, args):
 
-def mechanics(cursor, connection):
-    args = dict()
     args["title"] = "Добавить/удалить механика"
     if request.method == "GET":
         return render_template("addmechanics.html", args=args)

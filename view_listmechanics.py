@@ -1,8 +1,8 @@
 
-from flask import Flask, render_template, request, current_app, redirect
+from flask import render_template, request
 
-def listmechanics(cursor, connection):
-    args = dict()
+def listmechanics(cursor, connection, args):
+
     args["title"] = "Список механиков"
 
     query = (

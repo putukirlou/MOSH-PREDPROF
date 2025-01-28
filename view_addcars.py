@@ -1,8 +1,11 @@
-from flask import render_template, request,redirect
+import os
+import sqlite3
+from functools import wraps
+from flask import Flask, render_template, request, current_app, redirect
 
 
-def addcars(cursor, connection):
-    args = dict()
+def addcars(cursor, connection, args):
+
     args["title"] = "Добавить/удалить машину инкассации"
     if request.method == "GET":
         return render_template("addcars.html", args=args)

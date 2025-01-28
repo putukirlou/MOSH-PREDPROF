@@ -1,8 +1,9 @@
+import os
+import sqlite3
+from functools import wraps
+from flask import Flask, render_template, request, current_app, redirect
 
-from flask import render_template, request
-
-def listatm(cursor, connection):
-    args = dict()
+def listatm(cursor, connection, args):
     args["title"] = "Список банкоматов"
 
     query = (
