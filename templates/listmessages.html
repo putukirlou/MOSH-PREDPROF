@@ -1,63 +1,22 @@
 {% extends "base.html" %} {% block content %}
-    <h1 class="text-body-emphasis">Список механиков</h1>
-<section>
-  <table id="table">
-    <thead>
+<ul>
+  {% for item in args['messages'] %}
+</ul>
+<table border="1">
+  <thead>
     <tr>
-      <th scope="col">id</th>
-      <th scope="col">DeviceID</th>
-      <th scope="col">EventType</th>
-      <th scope="col">Timestamp</th>
-      <th scope="col">Value</th>
+      <th>ID</th>
+      <th>DEVICE_ID</th>
+      <th>LL</th>
+      <th>STATUS</th>
     </tr>
-    </thead>
-
-    <tbody>
+  </thead>
+  <tbody>
     <tr>
-      <td>
-        <ul>
-            {% for item in args['messages'] %}
-            <li>{{item["id"]}}</li>
-            {% endfor %}
-        </ul>
-      </td>
-      <td>
-        <ul>
-            {% for item in args['messages'] %}
-            <li>{{item["DeviceID"]}}</li>
-            {% endfor %}
-        </ul>
-      </td>
-      <td>
-        <ul>
-            {% for item in args['messages'] %}
-            <li>{{item["EventType"]}}</li>
-            {% endfor %}
-        </ul>
-      </td>
-      <td>
-        <ul>
-            {% for item in args['messages'] %}
-            <li>{{item["Timestamp"]}}</li>
-            {% endfor %}
-        </ul>
-      </td>
-
-      <td>
-        <ul>
-            {% for item in args['messages'] %}
-            <li>{{item["Value"]}}</li>
-            {% endfor %}
-        </ul>
-      </td>
+      {item["id"]}
+    
     </tr>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="table-sort.js"></script>
-    <tbody>
-  </table>
-</section>
-
-
-
+  </tbody>
+</table>
 
 {% endblock %}

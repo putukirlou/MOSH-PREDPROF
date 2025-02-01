@@ -11,8 +11,10 @@ from view_addcars import *
 from view_listatm import *
 from view_listmechanics import *
 from view_listcars import *
-from view_listmessages import *
 from view_command import *
+from view_condition import *
+from view_listmessages import *
+from map import *
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -147,6 +149,13 @@ def listcars_route(cursor, connection, args):
 @authorization
 def listmessages_route(cursor, connection, args):
     return listmessages(cursor, connection, args)
+
+
+@app.route("/condition", endpoint="condition", methods=["GET", "POST"])
+@connect_db
+@authorization
+def condition_route(cursor, connection, args):
+    return condition(cursor, connection, args)
 
 
 @app.route("/command", endpoint="command", methods=["GET", "POST"])
