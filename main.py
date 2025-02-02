@@ -3,7 +3,10 @@ import sqlite3
 from functools import wraps
 import datetime
 from flask import Flask, render_template, request, current_app, redirect, session
+from io import BytesIO
 
+
+from flask import jsonify
 
 from view_addatm import *
 from view_addmechanics import *
@@ -13,7 +16,7 @@ from view_listmechanics import *
 from view_listcars import *
 from view_command import *
 from view_condition import *
-from view_listmessages import *
+
 from map import *
 
 app = Flask(
@@ -147,8 +150,9 @@ def listcars_route(cursor, connection, args):
 @app.route("/listmessages", endpoint="listmessages", methods=["GET", "POST"])
 @connect_db
 @authorization
-def listmessages_route(cursor, connection, args):
-    return listmessages(cursor, connection, args)
+def listmessages_route():
+    data = {'message': 'Hello from Flask!'}
+    return jsonify(data)
 
 
 @app.route("/condition", endpoint="condition", methods=["GET", "POST"])
