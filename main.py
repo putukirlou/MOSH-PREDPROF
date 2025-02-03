@@ -2,12 +2,9 @@ import os
 import sqlite3
 from functools import wraps
 import datetime
-from flask import Flask, render_template, request, current_app, redirect, session
-from io import BytesIO
+from flask import Flask, render_template, request, current_app, redirect, session,jsonify
 
-
-from flask import jsonify
-
+from werkzeug.utils import secure_filename
 from view_addatm import *
 from view_addmechanics import *
 from view_addcars import *
@@ -16,6 +13,8 @@ from view_listmechanics import *
 from view_listcars import *
 from view_command import *
 from view_condition import *
+from view_listmessages import *
+
 
 from map import *
 
@@ -24,6 +23,7 @@ app = Flask(
 )
 app.secret_key = "mosh"
 
+app.config['d_b'] = 'db'
 
 def connect_db(func):
     @wraps(func)
@@ -45,7 +45,24 @@ def connect_db(func):
             print(ex)
         return result
     return wrapper
+ALLOWED_EXTENSIONS = {'.csv'}
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/db', methods=['POST'])
+def db():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return 'There is file is submitted form.'
+        if file and not allowed_file(file.filename):
+            return 'Недопустимый тип файла', 400
+        file = request.files['file']
+        file.save(os.path.join(app.config['d_b'], file.filename))     
+        return 'Файл успешно загружен'
+    else:
+        return 'Не удалось загрузить файл'
 
 def authorization(func):
     def wrapper(cursor, connection):
@@ -64,7 +81,7 @@ def authorization(func):
             return func(cursor, connection, args)
         else:
             return render_template("login.html", args=args)
-
+        
     return wrapper
 
 
@@ -150,9 +167,8 @@ def listcars_route(cursor, connection, args):
 @app.route("/listmessages", endpoint="listmessages", methods=["GET", "POST"])
 @connect_db
 @authorization
-def listmessages_route():
-    data = {'message': 'Hello from Flask!'}
-    return jsonify(data)
+def listmessages_route(cursor, connection, args):
+    return listmessages(cursor, connection, args)
 
 
 @app.route("/condition", endpoint="condition", methods=["GET", "POST"])

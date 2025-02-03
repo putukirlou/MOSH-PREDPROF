@@ -19,6 +19,10 @@ def command(cursor, connection,args):
     mechanics = cursor.fetchall()
     args["mechanics"] = mechanics
 
+    cursor.execute(f"SELECT value * FROM messages;")
+    value = cursor.fetchall()
+    args["value"] = value
+
     cursor.execute(f"SELECT * FROM users;")
     users = cursor.fetchall()
     args["users"] = users
