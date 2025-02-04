@@ -6,14 +6,14 @@ def listmessages(cursor, connection, args):
     args["title"] = "Список "
 
     query = (
-        f"SELECT * FROM at;"
+        f"SELECT * FROM atm;"
     )
     cursor.execute(query)
     mechanics = cursor.fetchall()
     args["mechanics"] = mechanics
 
     query = (
-        f"SELECT * FROM mechanics();"
+        f"SELECT * FROM mechanics;"
     )
     cursor.execute(query)
     mechanics = cursor.fetchall()

@@ -1,11 +1,11 @@
 
 {% extends "base.html" %} {% block content %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Flask and JavaScript AJAX</title>
+<h1 class="text-body-emphasis">Список механиков</h1>
+<ul>
+    {% for item in args['mechanics'] %}
+    <li>{{item["id"]}} коорд.: {{item["name"]}} <a href='/deletemechanics?id={{item["id"]}}'>Удалить</a></li>
+    {% endfor %}
+</ul>
 
-</body>
-</html>
 {% endblock %}
