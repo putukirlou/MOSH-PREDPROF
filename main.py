@@ -14,9 +14,7 @@ from view_listcars import *
 from view_command import *
 from view_condition import *
 from view_listmessages import *
-
-
-from map import *
+from view_listmap import *
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -56,8 +54,6 @@ def db():
     if request.method == 'POST':
         if 'file' not in request.files:
             return 'There is file is submitted form.'
-        if file and not allowed_file(file.filename):
-            return 'Недопустимый тип файла', 400
         file = request.files['file']
         file.save(os.path.join(app.config['d_b'], file.filename))     
         return 'Файл успешно загружен'
@@ -185,10 +181,10 @@ def command_route(cursor, connection, args):
     return command(cursor, connection, args)
 
 
-@app.route("/map", endpoint="map", methods=["GET", "POST"])
+@app.route("/listmap", endpoint="listmap", methods=["GET", "POST"])
 @connect_db
-def map_route(cursor, connection, args):
-    return map(cursor, connection, args)
+def listmap_route(cursor, connection, args):
+    return listmap(cursor, connection, args)
 
 
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
