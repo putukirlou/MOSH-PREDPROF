@@ -13,8 +13,9 @@ from view_listmechanics import *
 from view_listcars import *
 from view_command import *
 from view_condition import *
-from view_listmessages import *
+
 from view_listmap import *
+import csv
 
 app = Flask(
     __name__, static_url_path="", static_folder="static", template_folder="templates"
@@ -160,11 +161,7 @@ def listcars_route(cursor, connection, args):
     return listcars(cursor, connection, args)
 
 
-@app.route("/listmessages", endpoint="listmessages", methods=["GET", "POST"])
-@connect_db
-@authorization
-def listmessages_route(cursor, connection, args):
-    return listmessages(cursor, connection, args)
+
 
 
 @app.route("/condition", endpoint="condition", methods=["GET", "POST"])
@@ -180,26 +177,105 @@ def condition_route(cursor, connection, args):
 def command_route(cursor, connection, args):
     return command(cursor, connection, args)
 
-
-@app.route("/listmap", endpoint="listmap", methods=["GET", "POST"])
+@app.route("/clearmessages", endpoint="clearmessages", methods=["GET", "POST"])
 @connect_db
-def listmap_route(cursor, connection, args):
+@authorization
+def clearmessages(cursor, connection, args):
+    query = "DELETE FROM messages;"
+    cursor.execute(query)
+    connection.commit()
+    return redirect(f"/list-messages", 301)
+
+
+@app.route("/list-messages", endpoint="listmessages", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmessages(cursor, connection, args):
+    args["title"] = "Список сообщений"
+
+    query = (
+        f"SELECT * FROM messages ;"
+    )
+    cursor.execute(query)
+    messages = cursor.fetchall()
+    args["count"] = len(messages)
+    args["messages"] = messages[:1000]
+
+    if request.method == "GET":
+        return render_template("listmessages.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessages.html", args=args)
+
+
+@app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
+@connect_db
+@authorization
+def loadcsv(cursor, connection, args):
+    args = dict()
+    args["title"] = "Загрузить CSV"
+    if request.method == "GET":
+        return render_template("loadcsv.html", args=args)
+    elif request.method == "POST":
+        if 'file' not in request.files:
+            args["error"] = "No file part"
+            return render_template("error.html", args=args)
+        file = request.files['file']
+        if file.filename == '':
+            args["error"] = "No selected file"
+            return render_template("error.html", args=args)
+        if file and file.filename.endswith('.csv'):
+            file_data = file.read().decode('utf-8')
+            csv_reader = csv.reader(file_data.splitlines())
+            rows = list(csv_reader)
+            # Печать массива строк в консоль (можно обработать по-другому)
+            # for row in rows:
+            #     print(row)
+            lines = []
+            for i, row in enumerate(rows):
+                if i == 0:
+                    continue
+                eventtype = row[1]
+                timestamp = row[2]
+                device_id = row[3]
+                user_id = row[4]
+                details = row[5]
+                if len(row) > 6:
+                    value = row[6]
+                else:
+                    value=" "
+                lines.append(f'("{eventtype}", "{timestamp}", "{device_id}", "{user_id}", "{details}", "{value}")')
+            query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
+            cursor.execute(query)
+            connection.commit()
+            return redirect(f"/list-messages", 301)
+        else:
+            args["error"] = "Invalid file type. Only CSV files are allowed."
+            return render_template("error.html", args=args)
+
+
+
+@app.route("/map", endpoint="map", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmessages(cursor, connection, args):
     args["title"] = "Карта"
 
     query = (
-        f"SELECT * FROM ATM;"
+        f"SELECT * FROM atm ;"
     )
     cursor.execute(query)
     atms = cursor.fetchall()
-    lines = []
+    lines=[]
     for atm in atms:
-        lines.append(atm["LL"])
+        lines.append(atm["ll"].replace("%2C", ","))
 
 
-    url = f"http://static-maps.yandex.ru/v1?ll=55.603857, 37.491780&lang=ru_RU&size=450, 450&z=10&pt={"~".join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=13&pt=37.620070,55.753630~37.623664,55.76094&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    print(url)
+    # url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=13&pt=37.620070,55.753630~37.623664,55.76094&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
     args['image_url'] = url
-    return listmap("listmap.html", args=args)
 
+    return render_template("map.html", args=args)
 
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
