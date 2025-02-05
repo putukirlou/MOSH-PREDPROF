@@ -1,11 +1,12 @@
-
 {% extends "base.html" %} {% block content %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Flask and JavaScript AJAX</title>
+    <h1 class="text-body-emphasis">Список первых 1000 сообщений</h1>
+    <p> Всего сообщений {{args['count']}}</p>
+    <ul>
+        {% for item in args['messages'] %}
+        <li>{{item["eventype"]}} {{item["timestamp"]}}</li>
+        {% endfor %}
+    </ul>
 
-</body>
-</html>
+
 {% endblock %}

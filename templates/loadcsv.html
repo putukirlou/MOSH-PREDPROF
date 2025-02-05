@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block content %}
+
+    <div class="container mt-5">
+        <h2>Загрузить CSV</h2>
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Выбрать CSV файл</label>
+                <input type="file" class="form-control-file" id="file" name="file" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Загрузить</button>
+        </form>
+    </div>
+
+
+{% endblock %}

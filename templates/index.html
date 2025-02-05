@@ -3,15 +3,9 @@
 <h1 class="text-body-emphasis">Загрузить CSV файл</h1>
 <p class="fs-5 col-md-8"></p>
 
-<div>
-    <form action = "/db" method = "POST" 
-         enctype = "multipart/form-data">
-      <input type="file" name="file">
-      <input type="Submit" value="Upload">
-    </form>
-    <div style="color:orange">{{ message }}</div>
-  </div>
- </body>
+<div class="mb-5">
+    <a href="/load-csv" class="btn btn-primary btn-lg px-4">Загрузить CSV</a>
+</div>
 
 <hr class="col-3 col-md-2 mb-5">
 
@@ -41,7 +35,7 @@
                     <svg class="bi" width="16" height="16">
                         <use xlink:href="#arrow-right-circle"/>
                     </svg>
-                    Изменить карту
+                    Карта
                 </a>
             </li>
             <li>
@@ -52,8 +46,12 @@
                     Добавить/удалить машину инкассации
                 </a>
             </li>
-            </a>
-            </li>
+            <li>
+                <a class="icon-link mb-1" href="/clearmessages" rel="noopener" target="_blank">
+                  <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+                  Очистить сообщения
+                </a>
+              </li>
         </ul>
     </div>
 
@@ -62,19 +60,11 @@
         <p></p>
         <ul class="list-unstyled ps-0">
             <li>
-                <a class="icon-link mb-1" href="/listmessages" rel="noopener" target="_blank">
+                <a class="icon-link mb-1" href="/list-messages">
                     <svg class="bi" width="16" height="16">
                         <use xlink:href="#arrow-right-circle"/>
                     </svg>
-                    Состояние парка банкоматов
-                </a>
-            </li>
-            <li>
-                <a class="icon-link mb-1" href="">
-                    <svg class="bi" width="16" height="16">
-                        <use xlink:href="#arrow-right-circle"/>
-                    </svg>
-                    Список сообщений от банкоматов
+                    Список сообщений333333
                 </a>
             </li>
             <li>
