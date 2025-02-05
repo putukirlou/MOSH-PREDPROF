@@ -184,7 +184,21 @@ def command_route(cursor, connection, args):
 @app.route("/listmap", endpoint="listmap", methods=["GET", "POST"])
 @connect_db
 def listmap_route(cursor, connection, args):
-    return listmap(cursor, connection, args)
+    args["title"] = "Карта"
+
+    query = (
+        f"SELECT * FROM ATM;"
+    )
+    cursor.execute(query)
+    atms = cursor.fetchall()
+    lines = []
+    for atm in atms:
+        lines.append(atm["LL"])
+
+
+    url = f"http://static-maps.yandex.ru/v1?ll=55.603857, 37.491780&lang=ru_RU&size=450, 450&z=10&pt={"~".join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    args['image_url'] = url
+    return listmap("listmap.html", args=args)
 
 
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
