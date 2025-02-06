@@ -4,7 +4,7 @@
     <p> Всего сообщений {{args['count']}}</p>
     <ul>
         {% for item in args['messages'] %}
-        <li>{{item["eventype"]}} {{item["timestamp"]}}</li>
+        <li>{{item["eventtype"]}} {{item["timestamp"]}}</li>
         {% endfor %}
     </ul>
 
