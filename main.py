@@ -181,7 +181,7 @@ def listmessages(cursor, connection, args):
     cursor.execute(query)
     messages = cursor.fetchall()
     args["count"] = len(messages)
-    args["messages"] = messages[:1000]
+    args["messages"] = messages[:10000]
 
     if request.method == "GET":
         return render_template("listmessages.html", args=args)
@@ -213,6 +213,7 @@ def loadcsv(cursor, connection, args):
             # for row in rows:
             #     print(row)
             lines = []
+            lines2 = []
             for i, row in enumerate(rows):
                 if i == 0:
                     continue
@@ -229,6 +230,7 @@ def loadcsv(cursor, connection, args):
             query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
             cursor.execute(query)
             connection.commit()
+
             return redirect(f"/list-messages", 301)
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
@@ -252,9 +254,9 @@ def listmessages(cursor, connection, args):
         lines.append(atm["ll"].replace("%2C", ","))
 
 
-    url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=13&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
     print(url)
-    # url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=13&pt=37.620070,55.753630~37.623664,55.76094&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+
     args['image_url'] = url
 
     return render_template("map.html", args=args)

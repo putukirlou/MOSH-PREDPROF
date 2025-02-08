@@ -1,12 +1,37 @@
 {% extends "base.html" %} {% block content %}
+<!DOCTYPE html>
 
-    <h1 class="text-body-emphasis">Список первых 1000 сообщений</h1>
-    <p> Всего сообщений {{args['count']}}</p>
-    <ul>
-        {% for item in args['messages'] %}
-        <li>{{item["eventtype"]}} {{item["timestamp"]}}</li>
-        {% endfor %}
-    </ul>
+<html>
+  <head>
+
+    <title>Users List</title>
+    <meta charset="utf-8">
+  </head>
+  <body>
+
+
+    <table id="myTable">
+        <thead>
+        <th>ID</th>
+        <th>DEVICE_ID</th>
+        <th>Timestamp</th>
+        <th>status</th>
+    </thead>
+      </tr>
+ {% for item in args['messages'] %}
+ {% for u in args['atm'] %}
+      <tr>
+        <td>{{ item["id"] }}</td>
+        <td>{{ item["Device_ID"] }}</td>
+        <td>{{item["Timestamp"]}}</td>
+        <td>{{u["status"]}}</td>
+      </tr>
+ {% endfor %}
+ {% endfor %}
+    </table>
+    
+  </body>
+</html>
 
 
 {% endblock %}
