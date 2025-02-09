@@ -242,7 +242,28 @@ def loadcsv(cursor, connection, args):
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
+@app.route("/map", endpoint="map", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmessages(cursor, connection, args):
+    args["title"] = "Карта"
 
+    query = (
+        f"SELECT * FROM atm;"
+    )
+    cursor.execute(query)
+    atms = cursor.fetchall()
+    lines=[]
+    for atm in atms:
+        lines.append(atm["ll"].replace("%2C", ","))
+
+
+    url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    print(url)
+
+    args['image_url'] = url
+
+    return render_template("map.html", args=args)
 
 @app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
