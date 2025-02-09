@@ -175,11 +175,13 @@ def clearmessages(cursor, connection, args):
 def listmessages(cursor, connection, args):
     args["title"] = "Список сообщений"
 
-    query = (
-        f"SELECT * FROM messages ;"
-    )
+    query = "SELECT * FROM messages;"
     cursor.execute(query)
     messages = cursor.fetchall()
+    
+    # Логирование количества сообщений
+    print(f"Messages found: {len(messages)}")
+
     args["count"] = len(messages)
     args["messages"] = messages[:10000]
 
@@ -201,65 +203,76 @@ def loadcsv(cursor, connection, args):
         if 'file' not in request.files:
             args["error"] = "No file part"
             return render_template("error.html", args=args)
+
         file = request.files['file']
         if file.filename == '':
             args["error"] = "No selected file"
             return render_template("error.html", args=args)
-        if file and file.filename.endswith('.csv'):
-            file_data = file.read().decode('utf-8')
-            csv_reader = csv.reader(file_data.splitlines())
-            rows = list(csv_reader)
-            # Печать массива строк в консоль (можно обработать по-другому)
-            # for row in rows:
-            #     print(row)
-            lines = []
-            lines2 = []
-            for i, row in enumerate(rows):
-                if i == 0:
-                    continue
-                eventtype = row[1]
-                timestamp = row[2]
-                device_id = row[3]
-                user_id = row[4]
-                details = row[5]
-                if len(row) > 6:
-                    value = row[6]
-                else:
-                    value=" "
-                lines.append(f'("{eventtype}", "{timestamp}", "{device_id}", "{user_id}", "{details}", "{value}")')
-            query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
-            cursor.execute(query)
-            connection.commit()
 
-            return redirect(f"/list-messages", 301)
+        if file and file.filename.endswith('.csv'):
+            try:
+                file_data = file.read().decode('utf-8')
+                csv_reader = csv.reader(file_data.splitlines())
+                rows = list(csv_reader)
+
+                print(f"Rows in CSV: {len(rows)}")  # Логируем количество строк
+
+                for i, row in enumerate(rows):
+                    if i == 0:  # Пропускаем заголовок
+                        continue
+
+                    print(f"Processing row: {row}")  # Логируем текущую строку
+
+                    eventtype = row[0]
+                    timestamp = row[1]
+                    device_id = row[2]
+                    user_id = row[3]
+                    details = row[4]
+                    value = row[5] if len(row) > 5 else " "
+
+                    print(f"Inserting into DB: {eventtype}, {timestamp}, {device_id}, {user_id}, {details}, {value}")
+
+                    # Отладочная информация перед запросом
+                    query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
+                               VALUES (?, ?, ?, ?, ?, ?);'''
+                    cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
+
+                connection.commit()
+                print("Data inserted successfully.")
+                return redirect(f"/list-messages", 301)
+            except sqlite3.Error as ex:
+                print(f"Error executing SQL: {ex}")  # Логирование ошибки SQL
+                args["error"] = f"Error executing SQL: {ex}"
+                return render_template("error.html", args=args)
+            except Exception as ex:
+                print(f"General error: {ex}")  # Логирование других ошибок
+                args["error"] = f"Error processing the CSV file: {ex}"
+                return render_template("error.html", args=args)
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
 
 
-
-@app.route("/map", endpoint="map", methods=["GET", "POST"])
+@app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
 @authorization
 def listmessages(cursor, connection, args):
-    args["title"] = "Карта"
+    args["title"] = "Список сообщений"
 
     query = (
-        f"SELECT * FROM atm;"
+        f"SELECT * FROM messages ;"
     )
     cursor.execute(query)
-    atms = cursor.fetchall()
-    lines=[]
-    for atm in atms:
-        lines.append(atm["ll"].replace("%2C", ","))
+    messages = cursor.fetchall()
+    print(f"Messages found: {len(messages)}")  # Логирование количества сообщений
+    args["count"] = len(messages)
+    args["messages"] = messages[:10000]
 
+    if request.method == "GET":
+        return render_template("listmessages.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessages.html", args=args)
 
-    url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
-    print(url)
-
-    args['image_url'] = url
-
-    return render_template("map.html", args=args)
 
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
