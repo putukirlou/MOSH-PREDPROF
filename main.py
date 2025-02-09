@@ -4,7 +4,6 @@ from functools import wraps
 import datetime
 from flask import Flask, render_template, request, current_app, redirect, session
 
-
 from view_addatm import *
 from view_addmechanics import *
 from view_addcars import *
@@ -40,6 +39,7 @@ def connect_db(func):
             print("Не удалось подключиться к SQLite БД.")
             print(ex)
         return result
+
     return wrapper
 
 
@@ -60,7 +60,7 @@ def authorization(func):
             return func(cursor, connection, args)
         else:
             return render_template("login.html", args=args)
-        
+
     return wrapper
 
 
@@ -143,8 +143,6 @@ def listcars_route(cursor, connection, args):
     return listcars(cursor, connection, args)
 
 
-
-
 @app.route("/condition", endpoint="condition", methods=["GET", "POST"])
 @connect_db
 @authorization
@@ -168,11 +166,11 @@ def clearmessages(cursor, connection, args):
     connection.commit()
     return redirect(f"/list-messages", 301)
 
+
 @app.route("/list-messages-atm", endpoint="list-messages-atm", methods=["GET", "POST"])
 @connect_db
 @authorization
 def listmechanicsatm(cursor, connection, args):
-
     args["title"] = "Список сообщений банкоматов"
 
     query = (
@@ -186,7 +184,6 @@ def listmechanicsatm(cursor, connection, args):
         return render_template("listmessagesatm.html", args=args)
     elif request.method == "POST":
         return render_template("listmessagesatm.html", args=args)
-
 
 
 @app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
@@ -228,6 +225,8 @@ def loadcsv(cursor, connection, args):
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
+
+
 @app.route("/map", endpoint="map", methods=["GET", "POST"])
 @connect_db
 @authorization
@@ -239,10 +238,9 @@ def listmessages(cursor, connection, args):
     )
     cursor.execute(query)
     atms = cursor.fetchall()
-    lines=[]
+    lines = []
     for atm in atms:
         lines.append(atm["ll"].replace("%2C", ","))
-
 
     url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
     print(url)
@@ -250,6 +248,7 @@ def listmessages(cursor, connection, args):
     args['image_url'] = url
 
     return render_template("map.html", args=args)
+
 
 @app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
@@ -391,6 +390,7 @@ def exit_from_profile():
     session.pop("name", None)
     session.pop("password", None)
     return redirect("/", 301)
+
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
