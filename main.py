@@ -175,20 +175,31 @@ def clearmessages(cursor, connection, args):
 def listmessages(cursor, connection, args):
     args["title"] = "Список сообщений"
 
+    # Запрос к базе данных для получения всех сообщений
     query = "SELECT * FROM messages;"
     cursor.execute(query)
     messages = cursor.fetchall()
-    
-    # Логирование количества сообщений
+
+    # Логируем количество сообщений
     print(f"Messages found: {len(messages)}")
 
     args["count"] = len(messages)
-    args["messages"] = messages[:10000]
+    args["messages"] = [dict(message) for message in messages]  # Преобразуем строки в словари
 
-    if request.method == "GET":
-        return render_template("listmessages.html", args=args)
-    elif request.method == "POST":
-        return render_template("listmessages.html", args=args)
+    # Получаем данные по статусу, если они есть в другой таблице
+    query_atm = "SELECT * FROM atm;"
+    cursor.execute(query_atm)
+    atm_data = cursor.fetchall()
+
+    # Добавляем статусы банкоматов в args
+    for message in args["messages"]:
+        device_id = message["device_id"]
+        atm_status = next((atm["status"] for atm in atm_data if atm["device_id"] == device_id), None)
+        message["status"] = atm_status
+
+    return render_template("listmessages.html", args=args)
+
+
 
 
 @app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
@@ -203,51 +214,30 @@ def loadcsv(cursor, connection, args):
         if 'file' not in request.files:
             args["error"] = "No file part"
             return render_template("error.html", args=args)
-
         file = request.files['file']
         if file.filename == '':
             args["error"] = "No selected file"
             return render_template("error.html", args=args)
-
         if file and file.filename.endswith('.csv'):
-            try:
-                file_data = file.read().decode('utf-8')
-                csv_reader = csv.reader(file_data.splitlines())
-                rows = list(csv_reader)
-
-                print(f"Rows in CSV: {len(rows)}")  # Логируем количество строк
-
-                for i, row in enumerate(rows):
-                    if i == 0:  # Пропускаем заголовок
-                        continue
-
-                    print(f"Processing row: {row}")  # Логируем текущую строку
-
-                    eventtype = row[0]
-                    timestamp = row[1]
-                    device_id = row[2]
-                    user_id = row[3]
-                    details = row[4]
-                    value = row[5] if len(row) > 5 else " "
-
-                    print(f"Inserting into DB: {eventtype}, {timestamp}, {device_id}, {user_id}, {details}, {value}")
-
-                    # Отладочная информация перед запросом
-                    query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
-                               VALUES (?, ?, ?, ?, ?, ?);'''
-                    cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
-
-                connection.commit()
-                print("Data inserted successfully.")
-                return redirect(f"/list-messages", 301)
-            except sqlite3.Error as ex:
-                print(f"Error executing SQL: {ex}")  # Логирование ошибки SQL
-                args["error"] = f"Error executing SQL: {ex}"
-                return render_template("error.html", args=args)
-            except Exception as ex:
-                print(f"General error: {ex}")  # Логирование других ошибок
-                args["error"] = f"Error processing the CSV file: {ex}"
-                return render_template("error.html", args=args)
+            file_data = file.read().decode('utf-8')
+            csv_reader = csv.reader(file_data.splitlines())
+            rows = list(csv_reader)
+            lines = []
+            for i, row in enumerate(rows):
+                if i == 0:  # пропускаем заголовок
+                    continue
+                eventtype = row[1]
+                timestamp = row[2]
+                device_id = row[3]
+                user_id = row[4]
+                details = row[5]
+                value = row[6] if len(row) > 6 else " "
+                # Используем параметризованный запрос
+                query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
+                           VALUES (?, ?, ?, ?, ?, ?);'''
+                cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
+            connection.commit()
+            return redirect(f"/list-messages", 301)
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
