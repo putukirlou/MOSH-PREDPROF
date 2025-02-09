@@ -32,12 +32,17 @@
       }
     </style>
       {% for item in args['messages'] %}
-
       <tr>
         <td>{{ item["id"] }}</td>
         <td>{{ item["device_id"] }}</td>
         <td>{{ item["timestamp"] }}</td>
-        <td>{{ item["status"] }}</td>
+        <td>
+          {% if "зажевало купюру" in item["value"].lower() %}
+            Не работает
+          {% else %}
+            Работает
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
 
