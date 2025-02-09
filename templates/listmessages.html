@@ -1,37 +1,35 @@
-{% extends "base.html" %} {% block content %}
-<!DOCTYPE html>
+{% extends "base.html" %}
+{% block content %}
 
+<!DOCTYPE html>
 <html>
   <head>
-
     <title>Users List</title>
     <meta charset="utf-8">
   </head>
   <body>
-
+    <h1>Список сообщений</h1>
 
     <table id="myTable">
         <thead>
-        <th>ID</th>
-        <th>DEVICE_ID</th>
-        <th>Timestamp</th>
-        <th>status</th>
-    </thead>
-      </tr>
- {% for item in args['messages'] %}
- {% for u in args['atm'] %}
-      <tr>
-        <td>{{ item["id"] }}</td>
-        <td>{{ item["Device_ID"] }}</td>
-        <td>{{item["Timestamp"]}}</td>
-        <td>{{u["status"]}}</td>
-      </tr>
- {% endfor %}
- {% endfor %}
+            <th>ID</th>
+            <th>DEVICE_ID</th>
+            <th>Timestamp</th>
+            <th>Status</th>
+        </thead>
+        <tbody>
+            {% for item in args['messages'] %}
+                <tr>
+                    <td>{{ item["id"] }}</td>
+                    <td>{{ item["device_id"] }}</td>
+                    <td>{{ item["timestamp"] }}</td>
+                    <td>{{ item["status"] if item["status"] else "Нет статуса" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    
+
   </body>
 </html>
-
 
 {% endblock %}
