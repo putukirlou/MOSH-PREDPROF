@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сортировка таблицы</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            cursor: pointer;
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+
+    <table id="myTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">id</th>
+                <th onclick="sortTable(1)">device_id</th>
+                <th onclick="sortTable(2)">status</th>
+            </tr>
+        </thead>
+      </tr>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse; /* Чтобы убрать лишние промежутки между границами ячеек */
+      }
+      th, td {
+        padding: 10px; /* Добавляем отступы внутри ячеек */
+        text-align: left; /* Выравнивание текста в ячейке по левому краю */
+        border: 1px solid #ddd; /* Добавляем границу вокруг ячеек */
+      }
+      th {
+        background-color: #f2f2f2; /* Цвет фона для заголовков столбцов */
+      }
+    </style>
+      {% for item in args['messages'] %}
+      <tr>
+        <td>{{ item["id"] }}</td>
+        <td>{{ item["device_id"] }}</td>
+        <td>{{ item["value"] }}</td>
+      </tr>
+      {% endfor %}
+
+    </table>
+    <script>
+        function sortTable(columnIndex) {
+            const table = document.getElementById("myTable");
+            const rows = Array.from(table.rows).slice(1); // Получаем массив строк без заголовка
+            const direction = table.dataset.sortDirection === "asc" ? -1 : 1; // Определяем направление сортировки
+            const sortedRows = rows.sort((a, b) => {
+                const aText = a.cells[columnIndex].innerText;
+                const bText = b.cells[columnIndex].innerText;
+        
+                if (!isNaN(aText) && !isNaN(bText)) { // Если оба значения числовые
+                    return (parseFloat(aText) - parseFloat(bText)) * direction;
+                }
+                return aText.localeCompare(bText) * direction; // Сравниваем строки
+            });
+        
+            // Устанавливаем новое направление сортировки
+            table.dataset.sortDirection = direction === 1 ? "asc" : "desc";
+        
+            // Пересоздаем тело таблицы с отсортированными строками
+            const tbody = table.querySelector("tbody");
+            tbody.innerHTML = "";
+            sortedRows.forEach(row => tbody.appendChild(row));
+        }
+        </script>
+  </body>
+</html>
+
+{% endblock %}

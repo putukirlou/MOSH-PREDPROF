@@ -168,38 +168,24 @@ def clearmessages(cursor, connection, args):
     connection.commit()
     return redirect(f"/list-messages", 301)
 
-
-@app.route("/list-messages", endpoint="listmessages", methods=["GET", "POST"])
+@app.route("/list-messages-atm", endpoint="list-messages-atm", methods=["GET", "POST"])
 @connect_db
 @authorization
-def listmessages(cursor, connection, args):
-    args["title"] = "Список сообщений"
+def listmechanicsatm(cursor, connection, args):
 
-    # Запрос к базе данных для получения всех сообщений
-    query = "SELECT * FROM messages;"
+    args["title"] = "Список сообщений банкоматов"
+
+    query = (
+        f"SELECT * FROM messages;"
+    )
     cursor.execute(query)
     messages = cursor.fetchall()
+    args["messages"] = messages
 
-    # Логируем количество сообщений
-    print(f"Messages found: {len(messages)}")
-
-    args["count"] = len(messages)
-    args["messages"] = [dict(message) for message in messages]  # Преобразуем строки в словари
-
-    # Получаем данные по банкоматам
-    query_atm = "SELECT * FROM atm;"
-    cursor.execute(query_atm)
-    atm_data = cursor.fetchall()
-
-    # Добавляем статусы банкоматов в сообщения
-    for message in args["messages"]:
-        device_id = message["device_id"]
-        # Ищем статус для каждого устройства
-        atm_status = next((atm["status"] for atm in atm_data if atm["device_id"] == device_id), None)
-        # Присваиваем статус или None, если не найдено
-        message["status"] = atm_status
-
-    return render_template("listmessages.html", args=args)
+    if request.method == "GET":
+        return render_template("listmessagesatm.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessagesatm.html", args=args)
 
 
 
@@ -279,7 +265,31 @@ def listmessages(cursor, connection, args):
     print(f"Messages found: {len(messages)}")  # Логирование количества сообщений
     args["count"] = len(messages)
     args["messages"] = messages[:10000]
+    args["title"] = "Список сообщений"
 
+    # Запрос к базе данных для получения всех сообщений
+    query = "SELECT * FROM messages;"
+    cursor.execute(query)
+    messages = cursor.fetchall()
+
+    # Логируем количество сообщений
+    print(f"Messages found: {len(messages)}")
+
+    args["count"] = len(messages)
+    args["messages"] = [dict(message) for message in messages]  # Преобразуем строки в словари
+
+    # Получаем данные по банкоматам
+    query_atm = "SELECT * FROM atm;"
+    cursor.execute(query_atm)
+    atm_data = cursor.fetchall()
+
+    # Добавляем статусы банкоматов в сообщения
+    for message in args["messages"]:
+        device_id = message["device_id"]
+        # Ищем статус для каждого устройства
+        atm_status = next((atm["status"] for atm in atm_data if atm["device_id"] == device_id), None)
+        # Присваиваем статус или None, если не найдено
+        message["status"] = atm_status
     if request.method == "GET":
         return render_template("listmessages.html", args=args)
     elif request.method == "POST":
