@@ -202,6 +202,7 @@ def listmessages(cursor, connection, args):
     return render_template("listmessages.html", args=args)
 
 
+
 @app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
 @connect_db
 @authorization
