@@ -75,7 +75,7 @@ def listmessages(cursor, connection, args):
         
         for row in statuses:
             event_time = datetime.datetime.strptime(row["timestamp"], "%Y-%m-%d %H:%M:%S")
-            status = 0 if "нужен механик" in row["details"] else 1
+            status = 0 if "нужен механик" in row["details"].lower() else 1
             
             if prev_time is not None:
                 time_diff = (event_time - prev_time).total_seconds()
@@ -92,6 +92,14 @@ def listmessages(cursor, connection, args):
             prev_status = status
             last_status = status
             last_update = event_time
+        
+        # Если последний статус был "нужен механик", считаем, что банкомат до сих пор сломан
+        if last_status == 0 and last_update is not None:
+            time_diff = (now - last_update).total_seconds()
+            if last_update >= week_ago:
+                total_week_time += time_diff
+            if last_update >= month_ago:
+                total_month_time += time_diff
         
         if total_week_time > 0:
             week_percent = (week_work_time / total_week_time) * 100
