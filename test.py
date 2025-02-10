@@ -21,7 +21,24 @@ def listmessages(cursor, connection, args):
     for message in messages:
         device_id = message["device_id"]
         timestamp = datetime.datetime.strptime(message["timestamp"], "%Y-%m-%d %H:%M:%S")
-        status = 0 if "нужен механик" in message["details"].lower() else 1
+        status = 1  # По умолчанию считаем, что банкомат работает
+
+        # Проверяем значения в details для определения статуса банкомата
+        value = message["value"].strip().capitalize()
+
+        if value in ["Купюра зажевана", "Клавиатура не работает", "Найдены ошибки", "Не работает", 
+                     "Нет бумаги", "Нет свободного места", "Нет соединения", "Нуждается в замене", 
+                     "Ошибка механизма", "Обновление доступно", "Ошибка питания", "Ошибка связи", 
+                     "Ошибка сети", "Ошибка совместимости", "Ошибка чтения", "Плохое", "Потеря соединения", 
+                     "Принтер не работает", "Проблема с сетью", "Проблемы с энергоснабжением", 
+                     "Профилактическое", "Слабый сигнал", "Техническая ошибка", "Техическая", 
+                     "Нет свободного места", "Пустой", "Потеря пакетов"]:
+            status = 0  # Требуется механик
+        elif value in ["Нет наличных", "Низкий уровень наличных"]:
+            status = 2  # Требуется машина инкассации
+        elif value in ["Настройки сброшены", "Устройство отключено", "Не удалось", 
+                       "Некоторые системы не работают", "Закрыто"]:
+            status = 3  # В ремонте
 
         # Обновляем статус и последнюю дату для каждого банкомата
         if device_id not in atm_status:
@@ -39,24 +56,13 @@ def listmessages(cursor, connection, args):
     week_ago = now - datetime.timedelta(days=7)
     month_ago = now - datetime.timedelta(days=30)
 
-    # Итерация по банкоматам для расчета процентов
     for device_id, data in atm_status.items():
         week_statuses = [s for t, s in data["status_history"] if t >= week_ago]
         month_statuses = [s for t, s in data["status_history"] if t >= month_ago]
 
-        # Рассчитываем процент работы за неделю
-        if week_statuses:
-            week_percent = round(sum(week_statuses) / len(week_statuses) * 100, 2)
-        else:
-            week_percent = 0  # Если нет данных за неделю
+        week_percent = round(sum(week_statuses) / len(week_statuses) * 100, 2) if week_statuses else 0
+        month_percent = round(sum(month_statuses) / len(month_statuses) * 100, 2) if month_statuses else 0
 
-        # Рассчитываем процент работы за месяц
-        if month_statuses:
-            month_percent = round(sum(month_statuses) / len(month_statuses) * 100, 2)
-        else:
-            month_percent = 0  # Если нет данных за месяц
-
-        # Обновляем данные для банкоматов
         data["week_percent"] = week_percent
         data["month_percent"] = month_percent
 
@@ -66,7 +72,7 @@ def listmessages(cursor, connection, args):
         atm_list.append({
             "device_id": device_id,
             "last_update": data["last_update"].strftime("%Y-%m-%d %H:%M:%S"),
-            "last_status": "Работает" if data["last_status"] == 1 else "Не работает",
+            "last_status": ["Работает", "Требуется механик", "Требуется машина инкассации", "В ремонте"][data["last_status"]],
             "week_percent": f"{data['week_percent']}%",
             "month_percent": f"{data['month_percent']}%"
         })
