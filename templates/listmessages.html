@@ -8,17 +8,7 @@
     <meta charset="utf-8">
   </head>
   <body>
-
-    <table id="myTable">
-        <thead>
-
-          <tr>
-            <th onclick="sortTable(0)">id</th>
-            <th onclick="sortTable(1)">device_id</th>
-            <th onclick="sortTable(2)">status</th>
-        </thead>
-      </tr>
-    <style>
+    <table>    <style>
       table {
         width: 100%;
         border-collapse: collapse; /* Чтобы убрать лишние промежутки между границами ячеек */
@@ -32,52 +22,27 @@
         background-color: #f2f2f2; /* Цвет фона для заголовков столбцов */
       }
     </style>
-      {% for item in args['messages'] %}
       <tr>
-        <td>{{ item["device_id"] }}</td>
-        <td>{{ item["timestamp"] }}</td>
-
-        <td>
-
-          {% if item["value"] is string and item["value"].capitalize() in ["Купюра зажевана", "Клавиатура не работает", "Найдены ошибки", "Не работает", "Нет бумаги", "Нет свободного места", "Нет соединения", "Нуждается в замене", "Ошибка механизма", "Обновление доступно", "Ошибка питания", "Ошибка связи", "Ошибка сети", "Ошибка совместимости", "Ошибка чтения", "Плохое", "Потеря соединения", "Принтер не работает", "Проблема с сетью", "Проблемы с энергоснабжением", "Профилактическое", "Слабый сигнал", "Техническая ошибка", "Техическая", "Нет свободного места", "Пустой", "Потеря пакетов"] %}
-            Требуеться механик
-          {% elif item["value"] is string and item["value"].capitalize() in ["Нет наличных", "Низкий уровень наличных"] %}
-            Требуеться машина инкассации
-          {% elif item["value"] is string and item["value"].capitalize() in ["Настройки сброшены", "Устройство отключено", "Не удалось", "Некоторые системы не работают", "Закрыто"] %}
-            В ремонте
-          {% else %}
-            Работает
-          {% endif %}
-        </td>
+          <th>Банкомат</th>
+          <th>Дата последнего статуса</th>
+          <th>Последний статус</th>
+          <th>Процент работы за неделю</th>
+          <th>Процент работы за месяц</th>
+      </tr>
+      {% for atm in args["atms"] %}
+      <tr>
+          <td>{{ atm.device_id }}</td>
+          <td>{{ atm.last_update }}</td>
+          <td>{{ atm.last_status }}</td>
+          <td>{{ atm.weekly_uptime_percent }}</td>
+          <td>{{ atm.monthly_uptime_percent }}</td>
       </tr>
       {% endfor %}
+  </table>
 
-    </table>
-    <script>
-      function sortTable(columnIndex) {
-          const table = document.getElementById("myTable");
-          const rows = Array.from(table.rows).slice(1);
-          const direction = table.dataset.sortDirection === "asc" ? -1 : 1; 
-          const sortedRows = rows.sort((a, b) => {
-              const aText = a.cells[columnIndex].innerText;
-              const bText = b.cells[columnIndex].innerText;
-      
-              if (!isNaN(aText) && !isNaN(bText)) { 
-                  return (parseFloat(aText) - parseFloat(bText)) * direction;
-              }
-              return aText.localeCompare(bText) * direction; 
-          });
-      
-
-          table.dataset.sortDirection = direction === 1 ? "asc" : "desc";
-      
-
-          const tbody = table.querySelector("tbody");
-          tbody.innerHTML = "";
-          sortedRows.forEach(row => tbody.appendChild(row));
-      }
-      </script>
   </body>
 </html>
 
 {% endblock %}
+
+

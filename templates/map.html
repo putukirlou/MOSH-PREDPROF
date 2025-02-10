@@ -1,13 +1,19 @@
 {% extends "base.html" %} {% block content %}
 
 
- <div class="container mt-5">
-    <h2>Карта</h2>
+<div class="container mt-5">
+    <h2>Банкоматы</h2>
     <div class="map-container">
 
         <img src="{{ args['image_url'] }}" alt="Map" class="img-fluid">
-    </div>
-</div>
+        <h2>Список банкоматов:</h2>
+        <ul>
+            {% for atm in args['atm_list'] %}
+                <li>Банкомат{{atm["id"]}}<a href="{{ args['coodurl'] }}">Координаты</a></li>
+            {% endfor %}
+        </ul>
+            </div>
+        </div>
 
 
 

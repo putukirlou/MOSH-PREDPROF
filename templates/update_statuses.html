@@ -1,0 +1,15 @@
+{% extends "base.html" %} 
+{% block content %} 
+<!DOCTYPE html> 
+<html> 
+<head> 
+  <meta charset="utf-8"> 
+  <title>{{ args.title }}</title> 
+</head> 
+<body> 
+  <h1>{{ args.title }}</h1> 
+  <p>{{ args.message }}</p> 
+  <p><a href="/list-messages-atm">Перейти к списку статусов</a></p> 
+</body> 
+</html> 
+{% endblock %}
