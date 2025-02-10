@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 @app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
 @authorization
@@ -17,10 +19,15 @@ def listmessages(cursor, connection, args):
     # Словарь для хранения статуса работы банкоматов и времени
     atm_status = {}
 
+    # Время последней недели и месяца
+    now = datetime.now()
+    one_week_ago = now - timedelta(weeks=1)
+    one_month_ago = now - timedelta(weeks=4)
+
     # Обрабатываем сообщения, обновляя статусы банкоматов
     for message in messages:
         device_id = message["device_id"]
-        timestamp = datetime.datetime.strptime(message["timestamp"], "%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.strptime(message["timestamp"], "%Y-%m-%d %H:%M:%S")
         status = 1  # По умолчанию считаем, что банкомат работает
 
         # Проверяем значения в details для определения статуса банкомата
@@ -49,6 +56,7 @@ def listmessages(cursor, connection, args):
                 "down_time": 0,   # Общее время неработающего состояния
                 "status_history": []
             }
+
         # Если статус изменился, обновляем время работы/неработы
         if atm_status[device_id]["last_status"] != status:
             time_difference = (timestamp - atm_status[device_id]["last_update"]).total_seconds()
@@ -78,8 +86,28 @@ def listmessages(cursor, connection, args):
             uptime_percent = 100
             downtime_percent = 0
 
+        # Получаем данные для последней недели и месяца
+        weekly_uptime_time = 0
+        monthly_uptime_time = 0
+        for timestamp, status in data["status_history"]:
+            if timestamp >= one_week_ago:
+                if status == 1:
+                    weekly_uptime_time += (now - timestamp).total_seconds()
+            if timestamp >= one_month_ago:
+                if status == 1:
+                    monthly_uptime_time += (now - timestamp).total_seconds()
+
+        # Для недельного и месячного периода считаем проценты
+        weekly_total_time = (now - one_week_ago).total_seconds()
+        monthly_total_time = (now - one_month_ago).total_seconds()
+
+        weekly_uptime_percent = round((weekly_uptime_time / weekly_total_time) * 100, 2) if weekly_total_time > 0 else 100
+        monthly_uptime_percent = round((monthly_uptime_time / monthly_total_time) * 100, 2) if monthly_total_time > 0 else 100
+
         data["uptime_percent"] = uptime_percent
         data["downtime_percent"] = downtime_percent
+        data["weekly_uptime_percent"] = weekly_uptime_percent
+        data["monthly_uptime_percent"] = monthly_uptime_percent
 
     # Подготавливаем данные для отображения
     atm_list = []
@@ -89,7 +117,9 @@ def listmessages(cursor, connection, args):
             "last_update": data["last_update"].strftime("%Y-%m-%d %H:%M:%S"),
             "last_status": "Работает" if data["last_status"] == 1 else "Не работает",
             "uptime_percent": f"{data['uptime_percent']}%",
-            "downtime_percent": f"{data['downtime_percent']}%"
+            "downtime_percent": f"{data['downtime_percent']}%",
+            "weekly_uptime_percent": f"{data['weekly_uptime_percent']}%",
+            "monthly_uptime_percent": f"{data['monthly_uptime_percent']}%"
         })
 
     args["atms"] = atm_list
