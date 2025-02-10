@@ -4,7 +4,6 @@ from functools import wraps
 import datetime
 from flask import Flask, render_template, request, current_app, redirect, session
 
-
 from view_addatm import *
 from view_addmechanics import *
 from view_addcars import *
@@ -40,6 +39,7 @@ def connect_db(func):
             print("Не удалось подключиться к SQLite БД.")
             print(ex)
         return result
+
     return wrapper
 
 
@@ -60,7 +60,7 @@ def authorization(func):
             return func(cursor, connection, args)
         else:
             return render_template("login.html", args=args)
-        
+
     return wrapper
 
 
@@ -143,8 +143,6 @@ def listcars_route(cursor, connection, args):
     return listcars(cursor, connection, args)
 
 
-
-
 @app.route("/condition", endpoint="condition", methods=["GET", "POST"])
 @connect_db
 @authorization
@@ -169,24 +167,23 @@ def clearmessages(cursor, connection, args):
     return redirect(f"/list-messages", 301)
 
 
-@app.route("/list-messages", endpoint="listmessages", methods=["GET", "POST"])
+@app.route("/list-messages-atm", endpoint="list-messages-atm", methods=["GET", "POST"])
 @connect_db
 @authorization
-def listmessages(cursor, connection, args):
-    args["title"] = "Список сообщений"
+def listmechanicsatm(cursor, connection, args):
+    args["title"] = "Список сообщений банкоматов"
 
     query = (
-        f"SELECT * FROM messages ;"
+        f"SELECT * FROM messages;"
     )
     cursor.execute(query)
     messages = cursor.fetchall()
-    args["count"] = len(messages)
-    args["messages"] = messages[:10000]
+    args["messages"] = messages
 
     if request.method == "GET":
-        return render_template("listmessages.html", args=args)
+        return render_template("listmessagesatm.html", args=args)
     elif request.method == "POST":
-        return render_template("listmessages.html", args=args)
+        return render_template("listmessagesatm.html", args=args)
 
 
 @app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
@@ -209,33 +206,25 @@ def loadcsv(cursor, connection, args):
             file_data = file.read().decode('utf-8')
             csv_reader = csv.reader(file_data.splitlines())
             rows = list(csv_reader)
-            # Печать массива строк в консоль (можно обработать по-другому)
-            # for row in rows:
-            #     print(row)
             lines = []
-            lines2 = []
             for i, row in enumerate(rows):
-                if i == 0:
+                if i == 0:  # пропускаем заголовок
                     continue
                 eventtype = row[1]
                 timestamp = row[2]
                 device_id = row[3]
                 user_id = row[4]
                 details = row[5]
-                if len(row) > 6:
-                    value = row[6]
-                else:
-                    value=" "
-                lines.append(f'("{eventtype}", "{timestamp}", "{device_id}", "{user_id}", "{details}", "{value}")')
-            query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
-            cursor.execute(query)
+                value = row[6] if len(row) > 6 else " "
+                # Используем параметризованный запрос
+                query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
+                           VALUES (?, ?, ?, ?, ?, ?);'''
+                cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
             connection.commit()
-
             return redirect(f"/list-messages", 301)
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
-
 
 
 @app.route("/map", endpoint="map", methods=["GET", "POST"])
@@ -249,10 +238,9 @@ def listmessages(cursor, connection, args):
     )
     cursor.execute(query)
     atms = cursor.fetchall()
-    lines=[]
+    lines = []
     for atm in atms:
         lines.append(atm["ll"].replace("%2C", ","))
-
 
     url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
     print(url)
@@ -260,6 +248,52 @@ def listmessages(cursor, connection, args):
     args['image_url'] = url
 
     return render_template("map.html", args=args)
+
+
+@app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmessages(cursor, connection, args):
+    args["title"] = "Список сообщений"
+
+    query = (
+        f"SELECT * FROM messages ;"
+    )
+    cursor.execute(query)
+    messages = cursor.fetchall()
+    print(f"Messages found: {len(messages)}")  # Логирование количества сообщений
+    args["count"] = len(messages)
+    args["messages"] = messages[:10000]
+    args["title"] = "Список сообщений"
+
+    # Запрос к базе данных для получения всех сообщений
+    query = "SELECT * FROM messages;"
+    cursor.execute(query)
+    messages = cursor.fetchall()
+
+    # Логируем количество сообщений
+    print(f"Messages found: {len(messages)}")
+
+    args["count"] = len(messages)
+    args["messages"] = [dict(message) for message in messages]  # Преобразуем строки в словари
+
+    # Получаем данные по банкоматам
+    query_atm = "SELECT * FROM atm;"
+    cursor.execute(query_atm)
+    atm_data = cursor.fetchall()
+
+    # Добавляем статусы банкоматов в сообщения
+    for message in args["messages"]:
+        device_id = message["device_id"]
+        # Ищем статус для каждого устройства
+        atm_status = next((atm["status"] for atm in atm_data if atm["device_id"] == device_id), None)
+        # Присваиваем статус или None, если не найдено
+        message["status"] = atm_status
+    if request.method == "GET":
+        return render_template("listmessages.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessages.html", args=args)
+
 
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
@@ -356,6 +390,7 @@ def exit_from_profile():
     session.pop("name", None)
     session.pop("password", None)
     return redirect("/", 301)
+
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')

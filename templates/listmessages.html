@@ -1,37 +1,60 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <!DOCTYPE html>
 
 <html>
   <head>
-
-    <title>Users List</title>
+    <title>Список сообщений</title>
     <meta charset="utf-8">
   </head>
   <body>
-
 
     <table id="myTable">
         <thead>
         <th>ID</th>
         <th>DEVICE_ID</th>
         <th>Timestamp</th>
-        <th>status</th>
-    </thead>
+        <th>Status</th>
+        </thead>
       </tr>
- {% for item in args['messages'] %}
- {% for u in args['atm'] %}
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse; /* Чтобы убрать лишние промежутки между границами ячеек */
+      }
+      th, td {
+        padding: 10px; /* Добавляем отступы внутри ячеек */
+        text-align: left; /* Выравнивание текста в ячейке по левому краю */
+        border: 1px solid #ddd; /* Добавляем границу вокруг ячеек */
+      }
+      th {
+        background-color: #f2f2f2; /* Цвет фона для заголовков столбцов */
+      }
+    </style>
+      {% for item in args['messages'] %}
       <tr>
         <td>{{ item["id"] }}</td>
-        <td>{{ item["Device_ID"] }}</td>
-        <td>{{item["Timestamp"]}}</td>
-        <td>{{u["status"]}}</td>
+        <td>{{ item["device_id"] }}</td>
+        <td>{{ item["timestamp"] }}</td>
+
+        <td>
+
+          {% if item["value"] is string and item["value"].capitalize() in ["Купюра зажевана", "Клавиатура не работает", "Найдены ошибки", "Не работает", "Нет бумаги", "Нет свободного места", "Нет соединения", "Нуждается в замене", "Ошибка механизма", "Обновление доступно", "Ошибка питания", "Ошибка связи", "Ошибка сети", "Ошибка совместимости", "Ошибка чтения", "Плохое", "Потеря соединения", "Принтер не работает", "Проблема с сетью", "Проблемы с энергоснабжением", "Профилактическое", "Слабый сигнал", "Техническая ошибка", "Техическая", "Нет свободного места", "Пустой", "Потеря пакетов"] %}
+            Требуеться механик
+          {% elif item["value"] is string and item["value"].capitalize() in ["Нет наличных", "Низкий уровень наличных"] %}
+            Требуеться машина инкассации
+          {% elif item["value"] is string and item["value"].capitalize() in ["Настройки сброшены", "Устройство отключено", "Не удалось", "Некоторые системы не работают", "Закрыто"] %}
+            В ремонте
+          {% else %}
+            Работает
+          {% endif %}
+        </td>
       </tr>
- {% endfor %}
- {% endfor %}
+      {% endfor %}
+
     </table>
-    
+
   </body>
 </html>
-
 
 {% endblock %}
