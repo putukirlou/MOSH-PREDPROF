@@ -258,7 +258,7 @@ def listmessages(cursor, connection, args):
     atm_status = {}
 
     # Время последней недели и месяца
-    now = datetime.now()
+    now = datetime(2023,10, 18, 23, 0, 0, 0)
     one_week_ago = now - timedelta(weeks=1)
     one_month_ago = now - timedelta(weeks=4)
 
@@ -363,8 +363,8 @@ def listmessages(cursor, connection, args):
         # Проверка перед расчетом процентов за неделю и месяц
         print(f"Подсчет процентов за неделю и месяц для банкомата {device_id}: неделя = {weekly_uptime_time}, месяц = {monthly_uptime_time}")
 
-        weekly_uptime_percent = round((weekly_uptime_time / weekly_total_time) * 100, 2) if weekly_total_time > 0 else 100
-        monthly_uptime_percent = round((monthly_uptime_time / monthly_total_time) * 100, 2) if monthly_total_time > 0 else 100
+        weekly_uptime_percent = round((weekly_uptime_time / weekly_total_time), 2) if weekly_total_time > 0 else 100
+        monthly_uptime_percent = round((monthly_uptime_time / monthly_total_time), 2) if monthly_total_time > 0 else 100
 
         data["uptime_percent"] = uptime_percent
         data["downtime_percent"] = downtime_percent
