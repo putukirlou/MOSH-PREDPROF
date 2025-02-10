@@ -402,7 +402,7 @@ def listmessages(cursor, connection, args):
     args["title"] = "Карта"
 
     query = (
-        f"SELECT * FROM atm where STATUS = 0;"
+        f"SELECT * FROM atm"
     )
     cursor.execute(query)
     atms = cursor.fetchall()
@@ -413,21 +413,17 @@ def listmessages(cursor, connection, args):
         coordinates = atm["ll"].replace("%2C", ",")
         lines.append(coordinates)
         # Генерация ссылки для Яндекс.Карт
-        atm_link = f"https://yandex.ru/maps/?ll={coordinates}&z=14"
+        atm_link = f"https://yandex.ru/maps/?ll={coordinates}&z=18"
         atm_links.append(atm_link)  # Добавляем ссылку в список
 
     url = f"https://static-maps.yandex.ru/v1?ll=37.620070,55.753630&lang=ru_RU&size=450,450&z=10&size=600&pt={'~'.join(lines)}&apikey=f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
     print(url)
 
     args['image_url'] = url
-    coodurl = f'https://yandex.ru/maps/?ll={'~'.join(lines)}'
-    print(url)
-
-    args['coodurl'] = coodurl
 
     atm_list = []
     for atm, link in zip(atms, atm_links):  # Используем zip для объединения банкоматов и ссылок
-        atm_list.append(f'Банкомат {atm["id"]}: {atm["ll"].replace("%2C", ",")} - <a href="{link}" target="_blank">Ссылка на карту</a>')
+        atm_list.append(f'Банкомат {atm["id"]}: <a href="{link}" target="_blank">{atm["ll"].replace("%2C", ",")}</a>')
 
     # Передаем список в args для отображения в шаблоне
     args['atm_list'] = atm_list
