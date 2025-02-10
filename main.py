@@ -3,7 +3,7 @@ import sqlite3
 from functools import wraps
 import datetime
 from flask import Flask, render_template, request, current_app, redirect, session
-
+from datetime import datetime, timedelta
 from view_addatm import *
 from view_addmechanics import *
 from view_addcars import *
@@ -227,7 +227,7 @@ def loadcsv(cursor, connection, args):
             return render_template("error.html", args=args)
 
 
-from datetime import datetime, timedelta
+
 
 @app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
@@ -332,7 +332,7 @@ def listmessages(cursor, connection, args):
         total_period = total_time + down_time
 
         # Проверка перед расчетом процентов
-        #print(f"Подсчет процентов для банкомата {device_id}: общее время = {total_time}, время простоя = {down_time}")
+        print(f"Подсчет процентов для банкомата {device_id}: общее время = {total_time}, время простоя = {down_time}")
 
         if total_period > 0:
             uptime_percent = round((total_time / total_period) * 100, 2)
@@ -340,24 +340,28 @@ def listmessages(cursor, connection, args):
         else:
             uptime_percent = 100
             downtime_percent = 0
-
+        print(uptime_percent,downtime_percent)
         # Получаем данные для последней недели и месяца
         weekly_uptime_time = 0
         monthly_uptime_time = 0
         for timestamp, status in data["status_history"]:
+    
+            if isinstance(timestamp, str):
+                timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
             if timestamp >= one_week_ago:
                 if status == 1:
                     weekly_uptime_time += (now - timestamp).total_seconds()
+
             if timestamp >= one_month_ago:
                 if status == 1:
                     monthly_uptime_time += (now - timestamp).total_seconds()
-
+        print(monthly_uptime_time,weekly_uptime_time)
         # Для недельного и месячного периода считаем проценты
         weekly_total_time = (now - one_week_ago).total_seconds()
         monthly_total_time = (now - one_month_ago).total_seconds()
 
         # Проверка перед расчетом процентов за неделю и месяц
-        #print(f"Подсчет процентов за неделю и месяц для банкомата {device_id}: неделя = {weekly_uptime_time}, месяц = {monthly_uptime_time}")
+        print(f"Подсчет процентов за неделю и месяц для банкомата {device_id}: неделя = {weekly_uptime_time}, месяц = {monthly_uptime_time}")
 
         weekly_uptime_percent = round((weekly_uptime_time / weekly_total_time) * 100, 2) if weekly_total_time > 0 else 100
         monthly_uptime_percent = round((monthly_uptime_time / monthly_total_time) * 100, 2) if monthly_total_time > 0 else 100
@@ -368,13 +372,14 @@ def listmessages(cursor, connection, args):
         data["monthly_uptime_percent"] = monthly_uptime_percent
 
     # Проверка результатов расчетов
-    #print("Расчет процентов завершен.")
+    print("Расчет процентов завершен.")
 
     # Подготавливаем данные для отображения
     atm_list = []
-    #print("Подготовка данных для вывода на страницу.")
+    print("Подготовка данных для вывода на страницу.")
     for device_id, data in atm_status.items():
         atm_list.append({
+
             "device_id": device_id,
             "last_update": data["last_update"].strftime("%Y-%m-%d %H:%M:%S"),
             "last_status": "Работает" if data["last_status"] == 1 else "Не работает",
@@ -383,14 +388,11 @@ def listmessages(cursor, connection, args):
             "weekly_uptime_percent": f"{data['weekly_uptime_percent']}%",
             "monthly_uptime_percent": f"{data['monthly_uptime_percent']}%"
         })
-    
-    # Проверка подготовленных данных
-    #print(f"Подготовлено {len(atm_list)} банкоматов для вывода.")
 
+    print(f"Подготовлено {len(atm_list)} банкоматов для вывода.")
     args["atms"] = atm_list
 
-    # Возвращаем шаблон с данными
-    #print("Возвращаем данные в шаблон.")
+# Возвращаем шаблон с данными
     return render_template("listmessages.html", args=args)
 
 @app.route("/map", endpoint="map", methods=["GET", "POST"])

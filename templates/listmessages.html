@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 
 <html>
+  <h1 class="text-body-emphasis">Список статусов банкоматов</h1>
   <head>
     <title>Список сообщений</title>
     <meta charset="utf-8">
@@ -22,13 +23,17 @@
         background-color: #f2f2f2; /* Цвет фона для заголовков столбцов */
       }
     </style>
-      <tr>
-          <th>Банкомат</th>
-          <th>Дата последнего статуса</th>
-          <th>Последний статус</th>
-          <th>Процент работы за неделю</th>
-          <th>Процент работы за месяц</th>
-      </tr>
+    <table id="myTable">
+      <thead>
+          <tr>
+              <th onclick="sortTable(0)">Банкомат</th>
+              <th onclick="sortTable(1)">Дата последнего статуса</th>
+              <th onclick="sortTable(2)">Последний статус</th>
+              <th onclick="sortTable(3)">Процент работы за неделю</th>
+              <th onclick="sortTable(4)">Процент работы за месяц</th>
+          </tr>
+      </thead>
+    </tr>
       {% for atm in args["atms"] %}
       <tr>
           <td>{{ atm.device_id }}</td>
@@ -39,7 +44,30 @@
       </tr>
       {% endfor %}
   </table>
+  <script>
+    function sortTable(columnIndex) {
+        const table = document.getElementById("myTable");
+        const rows = Array.from(table.rows).slice(1);
+        const direction = table.dataset.sortDirection === "asc" ? -1 : 1; 
+        const sortedRows = rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].innerText;
+            const bText = b.cells[columnIndex].innerText;
+    
+            if (!isNaN(aText) && !isNaN(bText)) { 
+                return (parseFloat(aText) - parseFloat(bText)) * direction;
+            }
+            return aText.localeCompare(bText) * direction; 
+        });
+    
 
+        table.dataset.sortDirection = direction === 1 ? "asc" : "desc";
+    
+
+        const tbody = table.querySelector("tbody");
+        tbody.innerHTML = "";
+        sortedRows.forEach(row => tbody.appendChild(row));
+    }
+    </script>
   </body>
 </html>
 
