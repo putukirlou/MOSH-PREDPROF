@@ -34,6 +34,7 @@ def listmessages(cursor, connection, args):
     one_month_ago = now - timedelta(weeks=4)
 
     # Обрабатываем сообщения, обновляя статусы банкоматов
+    print("Начинаем обработку сообщений.")
     for message in messages:
         device_id = message["device_id"]
         timestamp = datetime.strptime(message["timestamp"], "%Y-%m-%d %H:%M:%S")
@@ -95,6 +96,7 @@ def listmessages(cursor, connection, args):
     print("Обработка всех сообщений завершена.")
 
     # Рассчитываем процент времени работы и неработы
+    print("Начинаем расчет процентов для каждого банкомата.")
     for device_id, data in atm_status.items():
         total_time = data["total_time"]
         down_time = data["down_time"]
@@ -141,6 +143,7 @@ def listmessages(cursor, connection, args):
 
     # Подготавливаем данные для отображения
     atm_list = []
+    print("Подготовка данных для вывода на страницу.")
     for device_id, data in atm_status.items():
         atm_list.append({
             "device_id": device_id,
@@ -158,4 +161,5 @@ def listmessages(cursor, connection, args):
     args["atms"] = atm_list
 
     # Возвращаем шаблон с данными
+    print("Возвращаем данные в шаблон.")
     return render_template("listmessages.html", args=args)
