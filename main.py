@@ -429,11 +429,9 @@ def listmessages(cursor, connection, args):
     args['atm_list'] = atm_list
 
     return render_template("map.html", args=args)
-
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
-@authorization
-def deleteatm(cursor, connection, args):
+def deleteatm(cursor, connection):
     args = dict()
     args["title"] = "Удалить банкомат"
     id = request.args.get("id")
@@ -447,15 +445,14 @@ def deleteatm(cursor, connection, args):
     cursor.execute(query)
     connection.commit()
 
-    return redirect(f"/listmeatm", 301)
+    return redirect(f"/listatm", 301)
 
 
 @app.route("/editatm", endpoint="editatm", methods=["GET", "POST"])
 @connect_db
-@authorization
-def editatm(cursor, connection, args):
+def editatm(cursor, connection):
     args = dict()
-    args["title"] = "Редактировать координаты"
+    args["title"] = "Редактировать карту"
     if request.method == "GET":
         id = request.args.get("id")
         if not id:
@@ -465,8 +462,8 @@ def editatm(cursor, connection, args):
         args["id"] = id
         return render_template("editatm.html", args=args)
     elif request.method == "POST":
-        ll = request.form.get("ll", "")
-        id = request.form.get("id", "")
+        ll=request.form.get("ll", "")
+        id=request.form.get("id", "")
         if not ll:
             args["error"] = "Не ввели Device ID"
             return render_template("error.html", args=args)
