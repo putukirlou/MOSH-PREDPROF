@@ -14,7 +14,7 @@ def listmessages(cursor, connection, args):
     cursor.execute(query_atm)
     atms = {atm["device_id"]: atm for atm in cursor.fetchall()}
 
-    # Словарь для хранения статуса работы банкоматов
+    # Словарь для хранения статуса работы банкоматов и времени
     atm_status = {}
 
     # Обрабатываем сообщения, обновляя статусы банкоматов
@@ -33,38 +33,53 @@ def listmessages(cursor, connection, args):
                      "Принтер не работает", "Проблема с сетью", "Проблемы с энергоснабжением", 
                      "Профилактическое", "Слабый сигнал", "Техническая ошибка", "Техическая", 
                      "Нет свободного места", "Пустой", "Потеря пакетов"]:
-            status = 0  # Требуется механик
+            status = 0  # Требуется механик или не работает
         elif value in ["Нет наличных", "Низкий уровень наличных"]:
-            status = 2  # Требуется машина инкассации
+            status = 0  # Требуется машина инкассации, банкомат не работает
         elif value in ["Настройки сброшены", "Устройство отключено", "Не удалось", 
                        "Некоторые системы не работают", "Закрыто"]:
-            status = 3  # В ремонте
+            status = 0  # В ремонте, банкомат не работает
 
-        # Обновляем статус и последнюю дату для каждого банкомата
+        # Обновляем статус и добавляем его в историю для вычисления времени
         if device_id not in atm_status:
             atm_status[device_id] = {
                 "last_status": status,
                 "last_update": timestamp,
+                "total_time": 0,  # Общее время работы
+                "down_time": 0,   # Общее время неработающего состояния
                 "status_history": []
             }
-        atm_status[device_id]["last_status"] = status
-        atm_status[device_id]["last_update"] = timestamp
+        # Если статус изменился, обновляем время работы/неработы
+        if atm_status[device_id]["last_status"] != status:
+            time_difference = (timestamp - atm_status[device_id]["last_update"]).total_seconds()
+
+            if atm_status[device_id]["last_status"] == 1:
+                atm_status[device_id]["total_time"] += time_difference  # Время работы
+            else:
+                atm_status[device_id]["down_time"] += time_difference  # Время неработающего состояния
+
+            # Обновляем статус
+            atm_status[device_id]["last_status"] = status
+            atm_status[device_id]["last_update"] = timestamp
+
+        # Добавляем статус в историю
         atm_status[device_id]["status_history"].append((timestamp, status))
 
-    # Рассчитываем процент работы за неделю и месяц
-    now = datetime.datetime.now()
-    week_ago = now - datetime.timedelta(days=7)
-    month_ago = now - datetime.timedelta(days=30)
-
+    # Рассчитываем процент времени работы и неработы
     for device_id, data in atm_status.items():
-        week_statuses = [s for t, s in data["status_history"] if t >= week_ago]
-        month_statuses = [s for t, s in data["status_history"] if t >= month_ago]
+        total_time = data["total_time"]
+        down_time = data["down_time"]
+        total_period = total_time + down_time
 
-        week_percent = round(sum(week_statuses) / len(week_statuses) * 100, 2) if week_statuses else 0
-        month_percent = round(sum(month_statuses) / len(month_statuses) * 100, 2) if month_statuses else 0
+        if total_period > 0:
+            uptime_percent = round((total_time / total_period) * 100, 2)
+            downtime_percent = round((down_time / total_period) * 100, 2)
+        else:
+            uptime_percent = 100
+            downtime_percent = 0
 
-        data["week_percent"] = week_percent
-        data["month_percent"] = month_percent
+        data["uptime_percent"] = uptime_percent
+        data["downtime_percent"] = downtime_percent
 
     # Подготавливаем данные для отображения
     atm_list = []
@@ -72,9 +87,9 @@ def listmessages(cursor, connection, args):
         atm_list.append({
             "device_id": device_id,
             "last_update": data["last_update"].strftime("%Y-%m-%d %H:%M:%S"),
-            "last_status": ["Работает", "Требуется механик", "Требуется машина инкассации", "В ремонте"][data["last_status"]],
-            "week_percent": f"{data['week_percent']}%",
-            "month_percent": f"{data['month_percent']}%"
+            "last_status": "Работает" if data["last_status"] == 1 else "Не работает",
+            "uptime_percent": f"{data['uptime_percent']}%",
+            "downtime_percent": f"{data['downtime_percent']}%"
         })
 
     args["atms"] = atm_list
