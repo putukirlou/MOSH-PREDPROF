@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Процент времени работы банкоматов</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Процент времени работы банкоматов</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>DEVICE_ID</th>
+                <th>Неделя (%)</th>
+                <th>Месяц (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for uptime in args["uptimes"] %}
+            <tr>
+                <td>{{ uptime["device_id"] }}</td>
+                <td>{{ uptime["uptime_week"] | round(2) }}%</td>
+                <td>{{ uptime["uptime_month"] | round(2) }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+{% endblock %}

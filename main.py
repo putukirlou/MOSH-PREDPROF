@@ -20,6 +20,8 @@ app = Flask(
 )
 app.secret_key = "mosh"
 
+from datetime import datetime, timedelta
+
 
 def connect_db(func):
     @wraps(func)
@@ -222,6 +224,7 @@ def loadcsv(cursor, connection, args):
                 device_id = row[3]
                 user_id = row[4]
                 details = row[5]
+<<<<<<< Updated upstream
                 if len(row) > 6:
                     value = row[6]
                 else:
@@ -229,6 +232,13 @@ def loadcsv(cursor, connection, args):
                 lines.append(f'("{eventtype}", "{timestamp}", "{device_id}", "{user_id}", "{details}", "{value}")')
             query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
             cursor.execute(query)
+=======
+                value = row[6] if len(row) > 6 else " "
+
+                query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
+                           VALUES (?, ?, ?, ?, ?, ?);'''
+                cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
+>>>>>>> Stashed changes
             connection.commit()
 
             return redirect(f"/list-messages", 301)
@@ -261,6 +271,204 @@ def listmessages(cursor, connection, args):
 
     return render_template("map.html", args=args)
 
+<<<<<<< Updated upstream
+=======
+
+@app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmessages(cursor, connection, args):
+    args["title"] = "Список сообщений"
+
+    query = (
+        f"SELECT * FROM messages ;"
+    )
+    cursor.execute(query)
+    messages = cursor.fetchall()
+    print(f"Messages found: {len(messages)}")
+    args["count"] = len(messages)
+    args["messages"] = messages[:10000]
+    args["title"] = "Список сообщений"
+    query = "SELECT * FROM messages;"
+    cursor.execute(query)
+    messages = cursor.fetchall()
+
+    print(f"Messages found: {len(messages)}")
+
+    args["count"] = len(messages)
+    args["messages"] = [dict(message) for message in messages]
+
+    query_atm = "SELECT * FROM atm;"
+    cursor.execute(query_atm)
+    atm_data = cursor.fetchall()
+
+    for message in args["messages"]:
+        device_id = message["device_id"]
+
+        atm_status = next((atm["status"] for atm in atm_data if atm["device_id"] == device_id), None)
+
+        message["status"] = atm_status
+        args["title"] = "Список сообщений банкоматов"
+
+    query = '''
+    SELECT m.*
+    FROM messages m
+    INNER JOIN (
+        SELECT device_id, MAX(timestamp) AS latest_timestamp
+        FROM messages
+        GROUP BY device_id
+    ) AS latest_messages
+    ON m.device_id = latest_messages.device_id AND m.timestamp = latest_messages.latest_timestamp;
+    '''
+
+    cursor.execute(query)
+    messages = cursor.fetchall()
+    args["messages"] = messages
+
+    if request.method == "GET":
+        return render_template("listmessages.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessages.html", args=args)
+
+
+def get_atm_uptime(cursor, device_id, start_date, end_date):
+    start_date_str = start_date.strftime('%Y-%m-%d %H:%M:%S')
+    end_date_str = end_date.strftime('%Y-%m-%d %H:%M:%S')
+
+    query = '''
+    SELECT timestamp, value
+    FROM messages
+    WHERE device_id = ? AND timestamp BETWEEN ? AND ?
+    ORDER BY timestamp;
+    '''
+    cursor.execute(query, (device_id, start_date_str, end_date_str))
+    messages = cursor.fetchall()
+
+    if not messages:
+        return 0
+
+    formatted_messages = []
+    for msg in messages:
+        try:
+            formatted_messages.append({
+                "timestamp": datetime.strptime(msg["timestamp"], '%Y-%m-%d %H:%M:%S'),
+                "status": msg["value"]
+            })
+        except Exception as e:
+            print(f"Ошибка преобразования timestamp: {msg['timestamp']} - {e}")
+
+    total_time = 0
+    working_time = 0
+    last_timestamp = formatted_messages[0]["timestamp"]
+    last_status = "Не работает"
+
+    for message in formatted_messages[1:]:
+        current_timestamp = message["timestamp"]
+        status = message["status"]
+
+        time_diff = (current_timestamp - last_timestamp).total_seconds()
+
+        total_time += time_diff
+
+        if "Работает" in last_status:
+            working_time += time_diff
+
+        last_timestamp = current_timestamp
+        last_status = status
+
+    if total_time > 0:
+        uptime_percentage = (working_time / total_time) * 100
+    else:
+        uptime_percentage = 0
+    print(
+        f"Банкомат {device_id}: Общее время = {total_time} сек, Время работы = {working_time} сек, Процент = {uptime_percentage}%")
+    return round(uptime_percentage, 2)
+
+
+@app.route("/uptime", endpoint="uptime", methods=["GET"])
+@connect_db
+@authorization
+def uptime(cursor, connection, args):
+    args["title"] = "Процент времени работы банкоматов"
+
+    now = datetime.now()
+    one_week_ago = now - timedelta(weeks=1)
+    one_month_ago = now - timedelta(days=30)
+
+    one_month_ago_str = one_month_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    query = '''
+    SELECT device_id, value, timestamp 
+    FROM messages 
+    WHERE timestamp >= ? 
+    ORDER BY device_id, timestamp;
+    '''
+    cursor.execute(query, (one_month_ago_str,))
+    statuses = cursor.fetchall()
+
+    if not statuses:
+        args["error"] = "Нет данных за последний месяц"
+        return render_template("error.html", args=args)
+
+    atm_statuses = {}
+    for row in statuses:
+        device_id = row["device_id"]
+
+        status = row["value"].strip().lower()
+        try:
+            timestamp = datetime.strptime(row["timestamp"], "%Y-%m-%d %H:%M:%S")
+        except Exception as e:
+            print(f"Ошибка преобразования timestamp: {row['timestamp']} - {e}")
+            continue
+
+        if device_id not in atm_statuses:
+            atm_statuses[device_id] = []
+        atm_statuses[device_id].append({"value": status, "timestamp": timestamp})
+
+    uptimes = []
+
+    for device_id, status_list in atm_statuses.items():
+
+        status_list.sort(key=lambda x: x["timestamp"])
+
+        total_week = 0
+        total_month = 0
+        working_week = 0
+        working_month = 0
+
+        for i in range(len(status_list) - 1):
+            start_time = status_list[i]["timestamp"]
+            end_time = status_list[i + 1]["timestamp"]
+            time_diff = (end_time - start_time).total_seconds()
+
+            if start_time >= one_week_ago:
+                total_week += time_diff
+                if status_list[i]["value"] == "работает":
+                    working_week += time_diff
+
+            total_month += time_diff
+            if status_list[i]["value"] == "работает":
+                working_month += time_diff
+
+        uptime_week = (working_week / total_week * 100) if total_week > 0 else 0
+        uptime_month = (working_month / total_month * 100) if total_month > 0 else 0
+
+        print(
+            f"Банкомат {device_id}: Общее время (неделя) = {total_week} сек, Время работы = {working_week} сек, Процент = {uptime_week}%")
+        print(
+            f"Банкомат {device_id}: Общее время (месяц) = {total_month} сек, Время работы = {working_month} сек, Процент = {uptime_month}%")
+
+        uptimes.append({
+            "device_id": device_id,
+            "uptime_week": uptime_week,
+            "uptime_month": uptime_month
+        })
+
+    args["uptimes"] = uptimes
+    return render_template("uptime.html", args=args)
+
+
+>>>>>>> Stashed changes
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
 @authorization

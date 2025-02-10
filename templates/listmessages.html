@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% block content %}
 <!DOCTYPE html>
 
+<<<<<<< Updated upstream
 <html>
   <head>
 
@@ -25,11 +26,102 @@
         <td>{{ item["Device_ID"] }}</td>
         <td>{{item["Timestamp"]}}</td>
         <td>{{u["status"]}}</td>
+=======
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сортировка таблицы</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            cursor: pointer;
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <table id="myTable">
+        <thead>
+
+          <th onclick="sortTable(0)">id</th>
+          <th onclick="sortTable(1)">device_id</th>
+          <th onclick="sortTable(2)">status</th>
+        </thead>
+      </tr>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse; 
+      }
+      th, td {
+        padding: 10px;
+        text-align: left; 
+        border: 1px solid #ddd; 
+      }
+      th {
+        background-color: #f2f2f2; 
+      }
+    </style>
+      {% for item in args['messages'] %}
+      <tr>
+        <td>{{ item["device_id"] }}</td>
+        <td>{{ item["timestamp"] }}</td>
+
+        <td>
+
+          {% if item["value"] is string and item["value"].capitalize() in ["Купюра зажевана", "Клавиатура не работает", "Найдены ошибки", "Не работает", "Нет бумаги", "Нет свободного места", "Нет соединения", "Нуждается в замене", "Ошибка механизма", "Обновление доступно", "Ошибка питания", "Ошибка связи", "Ошибка сети", "Ошибка совместимости", "Ошибка чтения", "Плохое", "Потеря соединения", "Принтер не работает", "Проблема с сетью", "Проблемы с энергоснабжением", "Профилактическое", "Слабый сигнал", "Техническая ошибка", "Техическая", "Нет свободного места", "Пустой", "Потеря пакетов"] %}
+            Требуеться механик
+          {% elif item["value"] is string and item["value"].capitalize() in ["Нет наличных", "Низкий уровень наличных"] %}
+            Требуеться машина инкассации
+          {% elif item["value"] is string and item["value"].capitalize() in ["Настройки сброшены", "Устройство отключено", "Не удалось", "Некоторые системы не работают", "Закрыто"] %}
+            В ремонте
+          {% else %}
+            Работает
+          {% endif %}
+        </td>
+>>>>>>> Stashed changes
       </tr>
  {% endfor %}
  {% endfor %}
     </table>
+<<<<<<< Updated upstream
     
+=======
+
+  <script>
+      function sortTable(columnIndex) {
+          const table = document.getElementById("myTable");
+          const rows = Array.from(table.rows).slice(1);
+          const direction = table.dataset.sortDirection === "asc" ? -1 : 1; 
+          const sortedRows = rows.sort((a, b) => {
+              const aText = a.cells[columnIndex].innerText;
+              const bText = b.cells[columnIndex].innerText;
+      
+              if (!isNaN(aText) && !isNaN(bText)) { 
+                  return (parseFloat(aText) - parseFloat(bText)) * direction;
+              }
+              return aText.localeCompare(bText) * direction; 
+          });
+      
+
+          table.dataset.sortDirection = direction === 1 ? "asc" : "desc";
+      
+
+          const tbody = table.querySelector("tbody");
+          tbody.innerHTML = "";
+          sortedRows.forEach(row => tbody.appendChild(row));
+      }
+      </script>
+>>>>>>> Stashed changes
   </body>
 </html>
 
