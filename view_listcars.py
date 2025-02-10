@@ -15,3 +15,4 @@ def listcars(cursor, connection, args):
         return render_template("listcars.html", args=args)
     elif request.method == "POST":
         return render_template("listcars.html", args=args)
+    
