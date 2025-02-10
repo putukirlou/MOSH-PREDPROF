@@ -124,4 +124,5 @@ def listmessages(cursor, connection, args):
 
     args["atms"] = atm_list
 
+    # Добавление информации о банкоматах в шаблон
     return render_template("listmessages.html", args=args)
