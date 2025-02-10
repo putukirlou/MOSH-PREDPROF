@@ -171,25 +171,6 @@ def clearmessages(cursor, connection, args):
     return redirect(f"/list-messages", 301)
 
 
-@app.route("/list-messages", endpoint="listmessages", methods=["GET", "POST"])
-@connect_db
-@authorization
-def listmessages(cursor, connection, args):
-    args["title"] = "Список сообщений"
-
-    query = (
-        f"SELECT * FROM messages ;"
-    )
-    cursor.execute(query)
-    messages = cursor.fetchall()
-    args["count"] = len(messages)
-    args["messages"] = messages[:10000]
-
-    if request.method == "GET":
-        return render_template("listmessages.html", args=args)
-    elif request.method == "POST":
-        return render_template("listmessages.html", args=args)
-
 
 @app.route("/load-csv", endpoint="loadcsv", methods=["GET", "POST"])
 @connect_db
@@ -211,41 +192,25 @@ def loadcsv(cursor, connection, args):
             file_data = file.read().decode('utf-8')
             csv_reader = csv.reader(file_data.splitlines())
             rows = list(csv_reader)
-            # Печать массива строк в консоль (можно обработать по-другому)
-            # for row in rows:
-            #     print(row)
             lines = []
-            lines2 = []
             for i, row in enumerate(rows):
-                if i == 0:
+                if i == 0:  
                     continue
                 eventtype = row[1]
                 timestamp = row[2]
                 device_id = row[3]
                 user_id = row[4]
                 details = row[5]
-<<<<<<< Updated upstream
-                if len(row) > 6:
-                    value = row[6]
-                else:
-                    value=" "
-                lines.append(f'("{eventtype}", "{timestamp}", "{device_id}", "{user_id}", "{details}", "{value}")')
-            query = f'INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value) VALUES {", ".join(lines)};'
-            cursor.execute(query)
-=======
                 value = row[6] if len(row) > 6 else " "
 
                 query = '''INSERT INTO messages (eventtype, timestamp, device_id, user_id, details, value)
                            VALUES (?, ?, ?, ?, ?, ?);'''
                 cursor.execute(query, (eventtype, timestamp, device_id, user_id, details, value))
->>>>>>> Stashed changes
             connection.commit()
-
             return redirect(f"/list-messages", 301)
         else:
             args["error"] = "Invalid file type. Only CSV files are allowed."
             return render_template("error.html", args=args)
-
 
 
 @app.route("/map", endpoint="map", methods=["GET", "POST"])
@@ -271,8 +236,6 @@ def listmessages(cursor, connection, args):
 
     return render_template("map.html", args=args)
 
-<<<<<<< Updated upstream
-=======
 
 @app.route("/list-messages", endpoint="listmessages_page", methods=["GET", "POST"])
 @connect_db
@@ -285,7 +248,7 @@ def listmessages(cursor, connection, args):
     )
     cursor.execute(query)
     messages = cursor.fetchall()
-    print(f"Messages found: {len(messages)}")
+    print(f"Messages found: {len(messages)}")  
     args["count"] = len(messages)
     args["messages"] = messages[:10000]
     args["title"] = "Список сообщений"
@@ -293,14 +256,17 @@ def listmessages(cursor, connection, args):
     cursor.execute(query)
     messages = cursor.fetchall()
 
+
     print(f"Messages found: {len(messages)}")
 
     args["count"] = len(messages)
-    args["messages"] = [dict(message) for message in messages]
+    args["messages"] = [dict(message) for message in messages] 
+
 
     query_atm = "SELECT * FROM atm;"
     cursor.execute(query_atm)
     atm_data = cursor.fetchall()
+
 
     for message in args["messages"]:
         device_id = message["device_id"]
@@ -309,6 +275,7 @@ def listmessages(cursor, connection, args):
 
         message["status"] = atm_status
         args["title"] = "Список сообщений банкоматов"
+
 
     query = '''
     SELECT m.*
@@ -320,7 +287,7 @@ def listmessages(cursor, connection, args):
     ) AS latest_messages
     ON m.device_id = latest_messages.device_id AND m.timestamp = latest_messages.latest_timestamp;
     '''
-
+    
     cursor.execute(query)
     messages = cursor.fetchall()
     args["messages"] = messages
@@ -466,9 +433,24 @@ def uptime(cursor, connection, args):
 
     args["uptimes"] = uptimes
     return render_template("uptime.html", args=args)
+@app.route("/list-messages-atm", endpoint="list-messages-atm", methods=["GET", "POST"])
+@connect_db
+@authorization
+def listmechanicsatm(cursor, connection, args):
+    args["title"] = "Список сообщений банкоматов"
 
+    query = (
+        f"SELECT * FROM messages;"
+    )
+    cursor.execute(query)
+    messages = cursor.fetchall()
+    args["messages"] = messages
 
->>>>>>> Stashed changes
+    if request.method == "GET":
+        return render_template("listmessagesatm.html", args=args)
+    elif request.method == "POST":
+        return render_template("listmessagesatm.html", args=args)
+
 @app.route("/deleteatm", endpoint="deleteatm", methods=["GET", "POST"])
 @connect_db
 @authorization

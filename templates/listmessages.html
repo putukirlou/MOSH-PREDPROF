@@ -1,74 +1,35 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <!DOCTYPE html>
 
-<<<<<<< Updated upstream
 <html>
   <head>
-
-    <title>Users List</title>
+    <title>Список сообщений</title>
     <meta charset="utf-8">
   </head>
   <body>
 
-
-    <table id="myTable">
-        <thead>
-        <th>ID</th>
-        <th>DEVICE_ID</th>
-        <th>Timestamp</th>
-        <th>status</th>
-    </thead>
-      </tr>
- {% for item in args['messages'] %}
- {% for u in args['atm'] %}
-      <tr>
-        <td>{{ item["id"] }}</td>
-        <td>{{ item["Device_ID"] }}</td>
-        <td>{{item["Timestamp"]}}</td>
-        <td>{{u["status"]}}</td>
-=======
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сортировка таблицы</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-        th {
-            cursor: pointer;
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
-<body>
     <table id="myTable">
         <thead>
 
-          <th onclick="sortTable(0)">id</th>
-          <th onclick="sortTable(1)">device_id</th>
-          <th onclick="sortTable(2)">status</th>
+          <tr>
+            <th onclick="sortTable(0)">id</th>
+            <th onclick="sortTable(1)">device_id</th>
+            <th onclick="sortTable(2)">status</th>
         </thead>
       </tr>
     <style>
       table {
         width: 100%;
-        border-collapse: collapse; 
+        border-collapse: collapse; /* Чтобы убрать лишние промежутки между границами ячеек */
       }
       th, td {
-        padding: 10px;
-        text-align: left; 
-        border: 1px solid #ddd; 
+        padding: 10px; /* Добавляем отступы внутри ячеек */
+        text-align: left; /* Выравнивание текста в ячейке по левому краю */
+        border: 1px solid #ddd; /* Добавляем границу вокруг ячеек */
       }
       th {
-        background-color: #f2f2f2; 
+        background-color: #f2f2f2; /* Цвет фона для заголовков столбцов */
       }
     </style>
       {% for item in args['messages'] %}
@@ -88,16 +49,11 @@
             Работает
           {% endif %}
         </td>
->>>>>>> Stashed changes
       </tr>
- {% endfor %}
- {% endfor %}
-    </table>
-<<<<<<< Updated upstream
-    
-=======
+      {% endfor %}
 
-  <script>
+    </table>
+    <script>
       function sortTable(columnIndex) {
           const table = document.getElementById("myTable");
           const rows = Array.from(table.rows).slice(1);
@@ -121,9 +77,7 @@
           sortedRows.forEach(row => tbody.appendChild(row));
       }
       </script>
->>>>>>> Stashed changes
   </body>
 </html>
-
 
 {% endblock %}
